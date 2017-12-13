@@ -6,11 +6,10 @@ namespace System.Matrix
 {
     public class Matrix : Device
     {
-        public Matrix(string ip, int portNum, IEntryData data) : base(ip, portNum)
+        public Matrix(IEntryData data) : base(data)
         {
             try
             {
-                EntryData = data;
                 ChannelList = new List<Channel>();
                 var offsets = File.ReadAllLines(CALIBRATE_OFFSET_DATA_PATH);
                 for (int i = 0; i < offsets.Length; i++)
@@ -31,8 +30,6 @@ namespace System.Matrix
                 }
             }
         }
-
-        public IEntryData EntryData { get; }
 
         public List<Channel> ChannelList { get; }
 
@@ -311,7 +308,7 @@ namespace System.Matrix
             }
         }
 
-        public Vertex(string ip, int portNum) : base(ip, portNum)
+        public Vertex(IEntryData data) : base(data)
         {
 
         }
@@ -410,12 +407,10 @@ namespace System.Matrix
 
     public abstract class CalBox : Device
     {
-        public CalBox(string ip, int portNum, IEntryData data) : base(ip, portNum)
+        public CalBox(IEntryData data) : base(data)
         {
-            _data = data;
-        }
 
-        protected IEntryData _data;
+        }
 
         public CalBoxData CalBoxData { get; set; }
 
@@ -477,7 +472,7 @@ namespace System.Matrix
         public void GetCalBoxData()
         {
             CalBoxData = new CalBoxData();
-            string result = GetCalBoxDataCmd((int)_data.Frequency * 1000);
+            string result = GetCalBoxDataCmd((int)EntryData.Frequency * 1000);
             result.Replace("\r\n", "");
             string[] calBoxVal = result.Split(':')[2].Split(';');
             for (int n = 1; n <= calBoxVal.Length; n++)
@@ -630,7 +625,7 @@ namespace System.Matrix
 
     public class CalBoxToMatrix : CalBox
     {
-        public CalBoxToMatrix(string ip, int portNum, IEntryData data) : base(ip, portNum, data)
+        public CalBoxToMatrix(IEntryData data) : base(data)
         {
 
         }
@@ -866,7 +861,7 @@ namespace System.Matrix
 
     public class CalBoxToVertex : CalBox
     {
-        public CalBoxToVertex(string ip, int portNum, IEntryData data) : base(ip, portNum, data)
+        public CalBoxToVertex(IEntryData data) : base(data)
         {
 
         }

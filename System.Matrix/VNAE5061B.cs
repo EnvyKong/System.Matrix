@@ -12,7 +12,7 @@ namespace System.Matrix
         ////定义读取的长度
         //private int intReadLength;
 
-        public VNAE5061B(string ip, int portNum) : base(ip, portNum)
+        public VNAE5061B(IEntryData data) : base(data)
         {
 
         }
@@ -29,7 +29,7 @@ namespace System.Matrix
             CONTINUOUS
         }
 
-        public override bool Connected { get;  set; }
+        public override bool Connected { get; set; }
 
         /// <summary>
         /// 连接仪表

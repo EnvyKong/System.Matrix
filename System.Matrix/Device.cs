@@ -9,19 +9,21 @@ namespace System.Matrix
 {
     public abstract class Device : TcpClient, IConnected, IIndexer, ICalibratable
     {
+        public IEntryData EntryData { get; }
+
         public const string CALIBRATE_OFFSET_DATA_PATH = "calibrate.txt";
 
         public string Name { get => GetType().Name; }
 
-        public int Quantity { get => (int)AppConfigInfo.GetProperty($"{Name}Quantity"); }
+        public int Quantity { get => (int)EntryData.GetPropertyValue($"{Name}Quantity"); }
 
-        public int APortNum { get => (int)AppConfigInfo.GetProperty($"{Name}ANum"); }
+        public int APortNum { get => (int)EntryData.GetPropertyValue($"{Name}ANum"); }
 
-        public int BPortNum { get => (int)AppConfigInfo.GetProperty($"{Name}BNum"); }
+        public int BPortNum { get => (int)EntryData.GetPropertyValue($"{Name}BNum"); }
 
-        public int APortConnectNum { get => (int)AppConfigInfo.GetProperty($"{Name}AConnectNum"); }
+        public int APortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}AConnectNum"); }
 
-        public int BPortConnectNum { get => (int)AppConfigInfo.GetProperty($"{Name}BConnectNum"); }
+        public int BPortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}BConnectNum"); }
 
         public int this[int aPortID, int bPortID]
         {
@@ -45,10 +47,9 @@ namespace System.Matrix
 
         public virtual string Cmd { get; set; }
 
-        protected Device(string ip, int portNum)
+        protected Device(IEntryData data)
         {
-            IP = ip;
-            PortNum = portNum;
+            EntryData = data;
         }
 
         private string _ip;
@@ -56,7 +57,7 @@ namespace System.Matrix
         {
             get
             {
-                return _ip;
+                return (string)EntryData.GetPropertyValue($"IPTo{Name}");
             }
             private set
             {
@@ -82,7 +83,7 @@ namespace System.Matrix
 
         public IPAddress IPAddress { get; private set; }
 
-        public int PortNum { get; private set; }
+        public int PortNum { get => (int)EntryData.GetPropertyValue($"PortNumTo{Name}"); }
 
         public virtual void Connect()
         {

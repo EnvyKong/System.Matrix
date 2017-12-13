@@ -9,6 +9,12 @@
         string IPToCalBoxForMatrix { get; set; }
         string IPToCalBoxForVertex { get; set; }
 
+        int PortNumToMatrix { get; set; }
+        int PortNumToVNA { get; set; }
+        int PortNumToVertex { get; set; }
+        int PortNumToCalBoxToMatrix { get; set; }
+        int PortNumToCalBoxToVertex { get; set; }
+
         long Frequency { get; set; }
         double AttenuationStep { get; set; }
         double PhaseStep { get; set; }

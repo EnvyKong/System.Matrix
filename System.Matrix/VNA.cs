@@ -6,7 +6,7 @@ namespace System.Matrix
     {
         protected FormattedIO488 messageBased;
 
-        public VNA(string ip, int portNum) : base(ip, portNum)
+        public VNA(IEntryData data) : base(data)
         {
 
         }

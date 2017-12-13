@@ -43,17 +43,17 @@ namespace System.Matrix
         {
             try
             {
-                _matrix = new Matrix(_data.IPToMatrix, 3000, _data);
+                _matrix = new Matrix(_data);
                 _vertexs = new Vertex[_data.VertexQuantity];
                 for (int i = 1; i <= _data.VertexQuantity; i++)
                 {
                     var dataType = _data.GetType();
                     var ip = dataType.GetProperty("IPToVertex" + i).ToString();
-                    _vertexs[i] = new Vertex(ip, 3000);
+                    _vertexs[i] = new Vertex(_data);
                 }
-                _calBoxToMatrix = new CalBoxToMatrix(_data.IPToCalBoxForMatrix, 3000, _data);
-                _calBoxToVertex = new CalBoxToVertex(_data.IPToCalBoxForVertex, 3000, _data);
-                _VNA = VNAFactory.GetVNA(_data.IPToVNA, -1);
+                _calBoxToMatrix = new CalBoxToMatrix(_data);
+                _calBoxToVertex = new CalBoxToVertex(_data);
+                _VNA = VNAFactory.GetVNA(_data);
 
                 foreach (var device in Devices)
                 {
@@ -81,21 +81,21 @@ namespace System.Matrix
             }
         }
 
-        private List<SignalPath> GetAllSignalPathData(CalBoxToMatrix calBoxToMatrix, CalBoxToVertex calBoxToVertex, IVectorNetworkAnalyzer VNA, Matrix matrix, Vertex[] vertex)
+        private List<SignalPath> GetAllSignalPathData()
         {
             var signalPaths = new List<SignalPath>();
             Log.log.Info("Start The Calibration.");
 
-            VNA.SetMarkerActive();
-            VNA.SetMarkerX(_data.Frequency * 1000000);
+            _VNA.SetMarkerActive();
+            _VNA.SetMarkerX(_data.Frequency * 1000000);
             //关闭Vertex所有通道，后面用哪个打开哪个
-            foreach (var v in vertex)
+            foreach (var v in _vertexs)
             {
                 v.CloseAllChannel(v.APortNum, v.BPortNum);
             }
             //for (int c = 1; c <= vertex.BPortNum; c++)
             //{
-            for (int b = 1; b <= matrix.BPortConnectNum; b++)
+            for (int b = 1; b <= _matrix.BPortConnectNum; b++)
             {
                 //下行
                 //var groupSignalPaths = new List<SignalPath>();
@@ -103,36 +103,36 @@ namespace System.Matrix
                 var inPortID = (b - 1) % _data.VertexAConnectNum + 1;
                 var outPortID = 1;
 
-                vertex[vertexID].OpenChannel(inPortID, outPortID, UpDown.DOWN);
+                _vertexs[vertexID].OpenChannel(inPortID, outPortID, UpDown.DOWN);
 
                 if (Log.log.IsInfoEnabled)
                 {
                     Log.log.InfoFormat("第{0}台Vertex响应。打开通道{1}{2}，方向{3}。", vertexID, inPortID, outPortID, UpDown.DOWN);
                 }
 
-                for (int a = 1; a <= matrix.APortConnectNum; a++)
+                for (int a = 1; a <= _matrix.APortConnectNum; a++)
                 {
                     var calBoxAPortID = a;
                     var calBoxBPortID = ((b - 1) / _data.VertexAConnectNum) * _data.VertexBConnectNum + 1;
 
-                    calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
+                    _calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
 
                     if (Log.log.IsInfoEnabled)
                     {
                         Log.log.InfoFormat("衰减校准阶段切开关 {0}{1} OK。", calBoxAPortID, calBoxBPortID);
                     }
-                    calBoxToMatrix.SetSwitch(a);
+                    _calBoxToMatrix.SetSwitch(a);
                     //calBoxToVertex.SetSwitch(c);
-                    var signalPath = new SignalPath(calBoxToMatrix.CalBoxData, _data)
+                    var signalPath = new SignalPath(_calBoxToMatrix.CalBoxData, _data)
                     {
                         APortID = a,
                         BPortID = b,
                         CPortID = 1,
-                        Attenuation = VNA.GetMarkerY(_data.AttMarkPoint),
+                        Attenuation = _VNA.GetMarkerY(_data.AttMarkPoint),
                     };
                     signalPaths.Add(signalPath);
                 }
-                vertex[vertexID].CloseChannel(inPortID, outPortID, UpDown.DOWN);
+                _vertexs[vertexID].CloseChannel(inPortID, outPortID, UpDown.DOWN);
 
                 if (Log.log.IsInfoEnabled)
                 {
@@ -222,7 +222,7 @@ namespace System.Matrix
                     if (i <= attCalFre)
                     {
                         //开始获取通道衰减
-                        _signalPaths = GetAllSignalPathData(_calBoxToMatrix, _calBoxToVertex, _VNA, _matrix, _vertexs);
+                        _signalPaths = GetAllSignalPathData();
                         if (Log.log.IsInfoEnabled)
                         {
                             Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", _signalPaths.Count, _vertexs.Length);

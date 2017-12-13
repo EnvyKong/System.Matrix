@@ -5,12 +5,12 @@ namespace System.Matrix
 {
     class VNARSZVB8 : VNA, IVectorNetworkAnalyzer
     {
-        public VNARSZVB8(string ip, int portNum) : base(ip, portNum)
+        public VNARSZVB8(IEntryData data) : base(data)
         {
 
         }
 
-        public override bool Connected { get;  set; }
+        public override bool Connected { get; set; }
 
         public override void Connect()
         {
