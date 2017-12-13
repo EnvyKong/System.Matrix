@@ -41,7 +41,7 @@ namespace System.Matrix
         {
             object obj = GetSingle(strSql);
             int cmdresult;
-            if ((Object.Equals(obj, null)) || (Object.Equals(obj, System.DBNull.Value)))
+            if ((Equals(obj, null)) || (Equals(obj, DBNull.Value)))
             {
                 cmdresult = 0;
             }
@@ -62,7 +62,7 @@ namespace System.Matrix
         {
             object obj = GetSingle(strSql, cmdParms);
             int cmdresult;
-            if ((Object.Equals(obj, null)) || (Object.Equals(obj, System.DBNull.Value)))
+            if ((Equals(obj, null)) || (Equals(obj, DBNull.Value)))
             {
                 cmdresult = 0;
             }
@@ -321,7 +321,7 @@ namespace System.Matrix
                     {
                         connection.Open();
                         object obj = cmd.ExecuteScalar();
-                        if ((Object.Equals(obj, null)) || (Object.Equals(obj, System.DBNull.Value)))
+                        if ((Equals(obj, null)) || (Equals(obj, DBNull.Value)))
                         {
                             return null;
                         }
@@ -468,7 +468,7 @@ namespace System.Matrix
                         PrepareCommand(cmd, connection, null, SQLString, cmdParms);
                         object obj = cmd.ExecuteScalar();
                         cmd.Parameters.Clear();
-                        if ((Object.Equals(obj, null)) || (Object.Equals(obj, System.DBNull.Value)))
+                        if ((Equals(obj, null)) || (Equals(obj, DBNull.Value)))
                         {
                             return null;
                         }

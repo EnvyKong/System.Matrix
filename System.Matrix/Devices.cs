@@ -6,10 +6,11 @@ namespace System.Matrix
 {
     public class Matrix : Device
     {
-        public Matrix(string ip, int portNum) : base(ip, portNum)
+        public Matrix(string ip, int portNum, IEntryData data) : base(ip, portNum)
         {
             try
             {
+                EntryData = data;
                 ChannelList = new List<Channel>();
                 var offsets = File.ReadAllLines(CALIBRATE_OFFSET_DATA_PATH);
                 for (int i = 0; i < offsets.Length; i++)
@@ -30,6 +31,8 @@ namespace System.Matrix
                 }
             }
         }
+
+        public IEntryData EntryData { get; }
 
         public List<Channel> ChannelList { get; }
 
@@ -135,8 +138,8 @@ namespace System.Matrix
                     foreach (var channel in channelList)
                     {
                         var currentPha = CurrentPha(this[channel.APortID, channel.BPortID]);
-                        var offset = (int)Math.Round(channel.PhaOffset / ViewConfigInfo.PhaseStep);
-                        var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (currentPha + offset) % (int)(360 / ViewConfigInfo.PhaseStep));
+                        var offset = (int)Math.Round(channel.PhaOffset / EntryData.PhaseStep);
+                        var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (currentPha + offset) % (int)(360 / EntryData.PhaseStep));
                         if ((!x.Contains("OK")))
                         {
                             Log.log.ErrorFormat("Signal Path ID : A{0}B{1} Set Value Error!", channel.APortID, channel.BPortID);
@@ -147,8 +150,8 @@ namespace System.Matrix
                 {
                     foreach (var channel in channelList)
                     {
-                        var offset = (int)Math.Round(channel.PhaOffset / ViewConfigInfo.PhaseStep);
-                        var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (channel.PhaStdCode + offset) % (int)(360 / ViewConfigInfo.PhaseStep));
+                        var offset = (int)Math.Round(channel.PhaOffset / EntryData.PhaseStep);
+                        var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (channel.PhaStdCode + offset) % (int)(360 / EntryData.PhaseStep));
                         if ((!x.Contains("OK")))
                         {
                             Log.log.ErrorFormat("Signal Path ID : A{0}B{1} Set Value Error!", channel.APortID, channel.BPortID);
@@ -194,7 +197,7 @@ namespace System.Matrix
                     foreach (var channel in channelList)
                     {
                         int currentAtt = CurrentAtt(this[channel.APortID, channel.BPortID]);
-                        int offset = (int)(Math.Round(channel.AttOffset / ViewConfigInfo.AttenuationStep) % 240);
+                        int offset = (int)(Math.Round(channel.AttOffset / EntryData.AttenuationStep) % 240);
                         var x = SetAttCmd(this[channel.APortID, channel.BPortID], (currentAtt + offset));
                         if (!x.Contains("OK"))
                         {
@@ -206,7 +209,7 @@ namespace System.Matrix
                 {
                     foreach (var channel in channelList)
                     {
-                        int offset = (int)(Math.Round(channel.AttOffset / ViewConfigInfo.AttenuationStep) % 240);
+                        int offset = (int)(Math.Round(channel.AttOffset / EntryData.AttenuationStep) % 240);
                         var x = SetAttCmd(this[channel.APortID, channel.BPortID], (channel.AttStdCode + offset));
                         if (!x.Contains("OK"))
                         {
@@ -407,10 +410,12 @@ namespace System.Matrix
 
     public abstract class CalBox : Device
     {
-        public CalBox(string ip, int portNum) : base(ip, portNum)
+        public CalBox(string ip, int portNum, IEntryData data) : base(ip, portNum)
         {
-
+            _data = data;
         }
+
+        protected IEntryData _data;
 
         public CalBoxData CalBoxData { get; set; }
 
@@ -472,7 +477,7 @@ namespace System.Matrix
         public void GetCalBoxData()
         {
             CalBoxData = new CalBoxData();
-            string result = GetCalBoxDataCmd((int)ViewConfigInfo.Frequency * 1000);
+            string result = GetCalBoxDataCmd((int)_data.Frequency * 1000);
             result.Replace("\r\n", "");
             string[] calBoxVal = result.Split(':')[2].Split(';');
             for (int n = 1; n <= calBoxVal.Length; n++)
@@ -625,7 +630,7 @@ namespace System.Matrix
 
     public class CalBoxToMatrix : CalBox
     {
-        public CalBoxToMatrix(string ip, int portNum) : base(ip, portNum)
+        public CalBoxToMatrix(string ip, int portNum, IEntryData data) : base(ip, portNum, data)
         {
 
         }
@@ -861,7 +866,7 @@ namespace System.Matrix
 
     public class CalBoxToVertex : CalBox
     {
-        public CalBoxToVertex(string ip, int portNum) : base(ip, portNum)
+        public CalBoxToVertex(string ip, int portNum, IEntryData data) : base(ip, portNum, data)
         {
 
         }

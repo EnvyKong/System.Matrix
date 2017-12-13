@@ -8,14 +8,20 @@ using TopYoung.MV.Core;
 
 namespace System.Matrix
 {
-    public class Operation
+    public class MatrixSystem
     {
-        Matrix matrix;
-        Vertex[] vertexs = new Vertex[AppConfigInfo.VertexQuantity];
-        CalBoxToMatrix calBoxToMatrix;
-        CalBoxToVertex calBoxToVertex;
-        IVectorNetworkAnalyzer VNA;
-        List<SignalPath> signalPaths;
+        public MatrixSystem(IEntryData data)
+        {
+            _data = data;
+        }
+
+        private IEntryData _data;
+        private Matrix _matrix;
+        private Vertex[] _vertexs;
+        private CalBoxToMatrix _calBoxToMatrix;
+        private CalBoxToVertex _calBoxToVertex;
+        private IVectorNetworkAnalyzer _VNA;
+        private List<SignalPath> _signalPaths;
 
         private List<IConnected> Devices
         {
@@ -23,39 +29,35 @@ namespace System.Matrix
             {
                 var devices = new List<IConnected>
                 {
-                    matrix,
-                    calBoxToMatrix,
-                    calBoxToVertex,
-                    VNA
+                    _matrix,
+                    _calBoxToMatrix,
+                    _calBoxToVertex,
+                    _VNA
                 };
-                devices.AddRange(vertexs);
+                devices.AddRange(_vertexs);
                 return devices;
             }
         }
 
-        private void DoCalibrate()
-        {
-            throw new NotImplementedException();
-        }
-
-        private void ConnectAll(IEntryData data)
+        public void ConnectAll()
         {
             try
             {
-                matrix = new Matrix(data.IPToMatrix, 3000);
-                for (int i = 1; i <= AppConfigInfo.VertexQuantity; i++)
+                _matrix = new Matrix(_data.IPToMatrix, 3000, _data);
+                _vertexs = new Vertex[_data.VertexQuantity];
+                for (int i = 1; i <= _data.VertexQuantity; i++)
                 {
-                    var dataType = data.GetType();
+                    var dataType = _data.GetType();
                     var ip = dataType.GetProperty("IPToVertex" + i).ToString();
-                    vertexs[i] = new Vertex(ip, 3000);
+                    _vertexs[i] = new Vertex(ip, 3000);
                 }
-                calBoxToMatrix = new CalBoxToMatrix(data.IPToCalBoxForMatrix, 3000);
-                calBoxToVertex = new CalBoxToVertex(data.IPToCalBoxForVertex, 3000);
-                VNA = VNAFactory.GetVNA(data.IPToVNA, -1);
+                _calBoxToMatrix = new CalBoxToMatrix(_data.IPToCalBoxForMatrix, 3000, _data);
+                _calBoxToVertex = new CalBoxToVertex(_data.IPToCalBoxForVertex, 3000, _data);
+                _VNA = VNAFactory.GetVNA(_data.IPToVNA, -1);
 
                 foreach (var device in Devices)
                 {
-                    device.Connect();
+                    device?.Connect();
                 }
             }
             catch (Exception ex)
@@ -64,7 +66,7 @@ namespace System.Matrix
             }
         }
 
-        private void DisConnectAll()
+        public void DisConnectAll()
         {
             try
             {
@@ -85,7 +87,7 @@ namespace System.Matrix
             Log.log.Info("Start The Calibration.");
 
             VNA.SetMarkerActive();
-            VNA.SetMarkerX(ViewConfigInfo.Frequency * 1000000);
+            VNA.SetMarkerX(_data.Frequency * 1000000);
             //关闭Vertex所有通道，后面用哪个打开哪个
             foreach (var v in vertex)
             {
@@ -97,8 +99,8 @@ namespace System.Matrix
             {
                 //下行
                 //var groupSignalPaths = new List<SignalPath>();
-                var vertexID = (b - 1) / AppConfigInfo.VertexAConnectNum;
-                var inPortID = (b - 1) % AppConfigInfo.VertexAConnectNum + 1;
+                var vertexID = (b - 1) / _data.VertexAConnectNum;
+                var inPortID = (b - 1) % _data.VertexAConnectNum + 1;
                 var outPortID = 1;
 
                 vertex[vertexID].OpenChannel(inPortID, outPortID, UpDown.DOWN);
@@ -111,7 +113,7 @@ namespace System.Matrix
                 for (int a = 1; a <= matrix.APortConnectNum; a++)
                 {
                     var calBoxAPortID = a;
-                    var calBoxBPortID = ((b - 1) / AppConfigInfo.VertexAConnectNum) * AppConfigInfo.VertexBConnectNum + 1;
+                    var calBoxBPortID = ((b - 1) / _data.VertexAConnectNum) * _data.VertexBConnectNum + 1;
 
                     calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
 
@@ -121,12 +123,12 @@ namespace System.Matrix
                     }
                     calBoxToMatrix.SetSwitch(a);
                     //calBoxToVertex.SetSwitch(c);
-                    var signalPath = new SignalPath(calBoxToMatrix.CalBoxData)
+                    var signalPath = new SignalPath(calBoxToMatrix.CalBoxData, _data)
                     {
                         APortID = a,
                         BPortID = b,
                         CPortID = 1,
-                        Attenuation = VNA.GetMarkerY(AppConfigInfo.AttMarkPoint),
+                        Attenuation = VNA.GetMarkerY(_data.AttMarkPoint),
                     };
                     signalPaths.Add(signalPath);
                 }
@@ -140,7 +142,7 @@ namespace System.Matrix
             return signalPaths;
         }
 
-        private void Output()
+        public void OutputResultWithForm()
         {
             try
             {
@@ -157,7 +159,7 @@ namespace System.Matrix
                     return;
                 }
                 string savePath = saveFile.FileName;
-                SaveTxtOrCsv(savePath);
+                OutputResult(savePath);
                 Log.log.Info("Output Completed！");
             }
             catch (Exception ex)
@@ -166,20 +168,20 @@ namespace System.Matrix
             }
         }
 
-        private void SaveTxtOrCsv(string savePath)
+        public void OutputResult(string savePath)
         {
-            for (int a = 1; a <= matrix.APortConnectNum; a++)
+            for (int a = 1; a <= _matrix.APortConnectNum; a++)
             {
-                for (int b = 1; b <= matrix.BPortConnectNum; b++)
+                for (int b = 1; b <= _matrix.BPortConnectNum; b++)
                 {
                     string[] offset = new string[1];
-                    offset[0] = $"{matrix[a, b]}:{a}:{b}:{matrix.CurrentPha(matrix[a, b])}:{matrix.CurrentAtt(matrix[a, b])}";
+                    offset[0] = $"{_matrix[a, b]}:{a}:{b}:{_matrix.CurrentPha(_matrix[a, b])}:{_matrix.CurrentAtt(_matrix[a, b])}";
                     File.AppendAllLines(savePath, offset);
                 }
             }
         }
 
-        private void Calibrate()
+        public void Calibrate()
         {
             try
             {
@@ -193,7 +195,7 @@ namespace System.Matrix
                     IsBackground = true
                 };
                 //获取校准盒子数据
-                getCalBoxDatasThread.Start(calBoxToMatrix);
+                getCalBoxDatasThread.Start(_calBoxToMatrix);
 
                 Thread resetMatrixThread = new Thread((matrix) =>
                 {
@@ -206,40 +208,40 @@ namespace System.Matrix
                     IsBackground = true
                 };
                 //相位衰减置零
-                resetMatrixThread.Start(matrix);
+                resetMatrixThread.Start(_matrix);
 
                 //等待子线程完成任务
                 getCalBoxDatasThread.Join();
                 resetMatrixThread.Join();
 
-                int attCalFre = AppConfigInfo.AttCalFre;
-                int phaCalFre = AppConfigInfo.PhaCalFre;
+                int attCalFre = _data.AttCalFre;
+                int phaCalFre = _data.PhaCalFre;
                 int maxCalCount = attCalFre > phaCalFre ? attCalFre : phaCalFre;
                 for (int i = 1; i <= maxCalCount; i++)
                 {
                     if (i <= attCalFre)
                     {
                         //开始获取通道衰减
-                        signalPaths = GetAllSignalPathData(calBoxToMatrix, calBoxToVertex, VNA, matrix, vertexs);
+                        _signalPaths = GetAllSignalPathData(_calBoxToMatrix, _calBoxToVertex, _VNA, _matrix, _vertexs);
                         if (Log.log.IsInfoEnabled)
                         {
-                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", signalPaths.Count, vertexs.Length);
+                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", _signalPaths.Count, _vertexs.Length);
                         }
 
                         //找到衰减最小值
-                        SignalPath.ExpectAttStandard = signalPaths.Select(s => s.Attenuation).Min();
+                        SignalPath.ExpectAttStandard = _signalPaths.Select(s => s.Attenuation).Min();
 
                         Thread setMatrixAttThread = new Thread((matrix) =>
                         {
                             var m = matrix as Matrix;
-                            m.SetAtt(signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
+                            m.SetAtt(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
                         })
                         {
                             CurrentCulture = Globalization.CultureInfo.InvariantCulture,
                             Name = "子线程：设置MCS补偿衰减。",
                             IsBackground = true
                         };
-                        setMatrixAttThread.Start(matrix);
+                        setMatrixAttThread.Start(_matrix);
                         setMatrixAttThread.Join();
 
                         if (Log.log.IsInfoEnabled)
@@ -252,36 +254,36 @@ namespace System.Matrix
                     {
                         //matrix.Channels = new List<Channel>();
                         //取相位
-                        for (int b = 1; b <= matrix.BPortConnectNum; b++)
+                        for (int b = 1; b <= _matrix.BPortConnectNum; b++)
                         {
                             //下行
                             //vertex.OpenChannel(b, 1, UpDown.DOWN);
                             //vertexs[b / AppConfigInfo.VertexAConnectNum].OpenChannel(b % AppConfigInfo.VertexAConnectNum, 1, UpDown.DOWN);
-                            var vertexID = (b - 1) / AppConfigInfo.VertexAConnectNum;
-                            var inPortID = (b - 1) % AppConfigInfo.VertexAConnectNum + 1;
+                            var vertexID = (b - 1) / _data.VertexAConnectNum;
+                            var inPortID = (b - 1) % _data.VertexAConnectNum + 1;
                             var outPortID = 1;
 
-                            vertexs[vertexID].OpenChannel(inPortID, outPortID, UpDown.DOWN);
+                            _vertexs[vertexID].OpenChannel(inPortID, outPortID, UpDown.DOWN);
 
                             if (Log.log.IsInfoEnabled)
                             {
                                 Log.log.InfoFormat("第{0}台Vertex响应。打开通道{1}{2}，方向{3}。", vertexID, inPortID, outPortID, UpDown.DOWN);
                             }
 
-                            for (int a = 1; a <= matrix.APortConnectNum; a++)
+                            for (int a = 1; a <= _matrix.APortConnectNum; a++)
                             {
                                 var calBoxAPortID = a;
-                                var calBoxBPortID = ((b - 1) / AppConfigInfo.VertexAConnectNum) * AppConfigInfo.VertexBConnectNum + 1;
-                                calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
+                                var calBoxBPortID = ((b - 1) / _data.VertexAConnectNum) * _data.VertexBConnectNum + 1;
+                                _calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
                                 if (Log.log.IsInfoEnabled)
                                 {
                                     Log.log.InfoFormat("相位校准阶段切开关 {0}{1} OK。", calBoxAPortID, calBoxBPortID);
                                 }
-                                signalPaths.Find(s => s.Index.Equals($"{a}:{b}:1")).Phase = VNA.GetMarkerY(AppConfigInfo.PhaMarkPoint);
+                                _signalPaths.Find(s => s.Index.Equals($"{a}:{b}:1")).Phase = _VNA.GetMarkerY(_data.PhaMarkPoint);
                             }
                             //vertex.CloseChannel(b, 1, UpDown.DOWN);
                             //vertexs[b / AppConfigInfo.VertexAConnectNum].CloseChannel(b % AppConfigInfo.VertexAConnectNum, 1, UpDown.DOWN);
-                            vertexs[vertexID].CloseChannel(inPortID, outPortID, UpDown.DOWN);
+                            _vertexs[vertexID].CloseChannel(inPortID, outPortID, UpDown.DOWN);
 
                             if (Log.log.IsInfoEnabled)
                             {
@@ -313,7 +315,7 @@ namespace System.Matrix
                         Thread setMatrixPhaThread = new Thread((matrix) =>
                         {
                             var m = matrix as Matrix;
-                            m.SetPha(signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
+                            m.SetPha(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
                         })
                         {
                             CurrentCulture = Globalization.CultureInfo.InvariantCulture,
@@ -321,7 +323,7 @@ namespace System.Matrix
                             IsBackground = true,
                         };
 
-                        setMatrixPhaThread.Start(matrix);
+                        setMatrixPhaThread.Start(_matrix);
 
                         setMatrixPhaThread.Join();
 
@@ -331,9 +333,7 @@ namespace System.Matrix
                         }
                     }
                 }
-
-
-                SaveTxtOrCsv(Device.CALIBRATE_OFFSET_DATA_PATH);
+                OutputResult(Device.CALIBRATE_OFFSET_DATA_PATH);
                 Log.log.Info("MCS Calibrate Successfully! Please Start Vertex Self Calibrate!");
             }
             catch (Exception ex)
@@ -342,29 +342,34 @@ namespace System.Matrix
             }
         }
 
-        private void CalibrateByFile()
+        public void CalibrateByFileWithForm()
+        {
+            OpenFileDialog loadPhaseOffset = new OpenFileDialog()
+            {
+                Filter = "Text File (*.txt)|*.txt|CSV File (*.csv)|*.csv",
+                Title = "Import Calibration Offset",
+                RestoreDirectory = true,
+                FilterIndex = 1
+            };
+            if (loadPhaseOffset.ShowDialog() != DialogResult.OK)
+            {
+                return;
+            }
+            CalibrateByFile(loadPhaseOffset.FileName);
+        }
+
+        public void CalibrateByFile(string path)
         {
             try
             {
-                OpenFileDialog loadPhaseOffset = new OpenFileDialog()
-                {
-                    Filter = "Text File (*.txt)|*.txt|CSV File (*.csv)|*.csv",
-                    Title = "Import Calibration Offset",
-                    RestoreDirectory = true,
-                    FilterIndex = 1
-                };
-                if (loadPhaseOffset.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-                var offsets = File.ReadAllLines(loadPhaseOffset.FileName);
+                var offsets = File.ReadAllLines(path);
                 for (int i = 0; i < offsets.Length; i++)
                 {
                     var offset = offsets[i].Split(':');
                     int id = int.Parse(offset[0]);
                     int pha = int.Parse(offset[3]);
                     int att = int.Parse(offset[4]);
-                    matrix.SetPhaAndAtt(id, pha, att);
+                    _matrix.SetPhaAndAtt(id, pha, att);
                 }
                 MessageBox.Show("Calibrate successfully!");
             }
@@ -405,12 +410,12 @@ namespace System.Matrix
                 var channels = new List<Channel>();
                 if (path.ToLower().EndsWith(".txt"))
                 {
-                    matrix.LoadOffsets(path, out channels);
+                    _matrix.LoadOffsets(path, out channels);
                 }
                 else if (path.ToLower().EndsWith(".csv"))
                 {
                     Scene scene = new Scene();
-                    scene.LoadSceneData(path, matrix);
+                    scene.LoadSceneData(path, _matrix);
                     foreach (var frame in scene.Frames)
                     {
                         foreach (var channel in frame.ChannelToMatrixCollection)
@@ -422,7 +427,7 @@ namespace System.Matrix
                         }
                     }
                 }
-                matrix.SetPha(channels, false);
+                _matrix.SetPha(channels, false);
                 Log.log.Info("Play successfully!");
             }
             catch (Exception ex)
@@ -452,11 +457,11 @@ namespace System.Matrix
             try
             {
                 Scene scene = new Scene();
-                scene.LoadSceneData(path, matrix);
+                scene.LoadSceneData(path, _matrix);
 
-                FtpClient ftpClient = new FtpClient(matrix.IP, "root", "123456");
-                var dbFileName = $"ASP{matrix.APortNum}B{matrix.BPortNum}.db";
-                var ftpPath = $"ftp://{matrix.IP}/media/mmcblk0p1/{dbFileName}";
+                FtpClient ftpClient = new FtpClient(_matrix.IP, "root", "123456");
+                var dbFileName = $"ASP{_matrix.APortNum}B{_matrix.BPortNum}.db";
+                var ftpPath = $"ftp://{_matrix.IP}/media/mmcblk0p1/{dbFileName}";
 
                 ftpClient.DownloadFile($"{dbFileName}", $"/media/mmcblk0p1/{dbFileName}");
 
@@ -488,14 +493,14 @@ namespace System.Matrix
                 ftpClient.UploadFile($"{dbFileName}", ftpPath);
 
                 string frameInfo = $"{fileName} {timeCmd} {scene.Frames.Count}";
-                matrix.AddFrameInfo(frameInfo);
+                _matrix.AddFrameInfo(frameInfo);
 
                 string checkInfo = $"{fileName} {timeCmd}";
-                matrix.CheckDB(checkInfo);
+                _matrix.CheckDB(checkInfo);
                 string downLoadInfo = $"{fileName} {timeCmd}";
-                matrix.DownLoadDBToFirmware(downLoadInfo);
+                _matrix.DownLoadDBToFirmware(downLoadInfo);
                 string playInfo = $"1:{fileName} {timeCmd} 1";
-                matrix.PlayScene(playInfo);
+                _matrix.PlayScene(playInfo);
 
                 MessageBox.Show("Start playing.");
             }

@@ -1,6 +1,6 @@
 ﻿namespace System.Matrix
 {
-    interface IEntryData
+    public interface IEntryData
     {
         string IPToMatrix { get; set; }
         string IPToVNA { get; set; }

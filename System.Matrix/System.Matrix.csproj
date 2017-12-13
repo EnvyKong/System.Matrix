@@ -68,7 +68,7 @@
   <ItemGroup>
     <Compile Include="Device.cs" />
     <Compile Include="Devices.cs" />
-    <Compile Include="Operation.cs" />
+    <Compile Include="MatrixSystem.cs" />
     <Compile Include="ICalibratable.cs" />
     <Compile Include="ICalibrate.cs" />
     <Compile Include="IEntryData.cs" />
@@ -82,7 +82,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings.cs" />
     <Compile Include="SQLiteHelper.cs" />
-    <Compile Include="ViewConfigInfo.cs" />
     <Compile Include="VNA.cs" />
     <Compile Include="VNAE5061B.cs" />
     <Compile Include="VNAFactory.cs" />

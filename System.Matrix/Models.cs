@@ -124,7 +124,7 @@ namespace System.Matrix
         {
             get
             {
-                return Owner.ChannelList.Find(c => c.APortID == APortID & c.BPortID == BPortID).AttStdCode + Math.Round(AttOffset / ViewConfigInfo.AttenuationStep).ToInt32();
+                return Owner.ChannelList.Find(c => c.APortID == APortID & c.BPortID == BPortID).AttStdCode + Math.Round(AttOffset / Owner.EntryData.AttenuationStep).ToInt32();
             }
         }
 
@@ -132,7 +132,7 @@ namespace System.Matrix
         {
             get
             {
-                return Owner.ChannelList.Find(c => c.APortID == APortID & c.BPortID == BPortID).PhaStdCode + Math.Round(PhaOffset / ViewConfigInfo.PhaseStep).ToInt32();
+                return Owner.ChannelList.Find(c => c.APortID == APortID & c.BPortID == BPortID).PhaStdCode + Math.Round(PhaOffset / Owner.EntryData.PhaseStep).ToInt32();
             }
         }
 
@@ -185,12 +185,14 @@ namespace System.Matrix
 
     public class SignalPath
     {
-        public SignalPath(CalBoxData calBoxData)
+        public SignalPath(CalBoxData calBoxData, IEntryData data)
         {
             _calBoxData = calBoxData;
+            _data = data;
         }
 
         private CalBoxData _calBoxData;
+        private IEntryData _data;
 
         public static bool HasAttStandardValue { get; private set; }
         public static bool HasPhaStandardValue { get; private set; }
@@ -258,7 +260,7 @@ namespace System.Matrix
         {
             get
             {
-                if (ViewConfigInfo.PhaseStepShiftDirection == PhaseStepShiftDirection.Anticlockwise)
+                if (_data.PhaseStepShiftDirection == PhaseStepShiftDirection.Anticlockwise)
                 {
                     return new Channel(APortID, BPortID) { AttOffset = Attenuation - ExpectAttStandard, PhaOffset = Phase - ExpectPhaStandard };
                 }
