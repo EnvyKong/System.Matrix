@@ -4,13 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
-using TopYoung.MV.Core;
 
 namespace System.Matrix
 {
-    public class MatrixSystem
+    public class MatrixSystemB : IMatrixSystem, ICalibrate
     {
-        public MatrixSystem(IEntryData data)
+        public MatrixSystemB(IEntryData data)
         {
             _data = data;
         }
@@ -20,6 +19,8 @@ namespace System.Matrix
         private Vertex[] _vertexs;
         private CalBoxToMatrix _calBoxToMatrix;
         private CalBoxToVertex _calBoxToVertex;
+        private SwitchAdapter _switchAdapter;
+
         private IVectorNetworkAnalyzer _VNA;
         private List<SignalPath> _signalPaths;
 
@@ -107,7 +108,6 @@ namespace System.Matrix
             for (int b = 1; b <= _matrix.BPortConnectNum; b++)
             {
                 //下行
-                //var groupSignalPaths = new List<SignalPath>();
                 var vertexID = (b - 1) / _vertexs[0].APortConnectNum;
                 var inPortID = (b - 1) % _vertexs[0].APortConnectNum + 1;
                 var outPortID = 1;
@@ -123,15 +123,15 @@ namespace System.Matrix
                 {
                     var calBoxAPortID = a;
                     var calBoxBPortID = ((b - 1) / _vertexs[0].APortConnectNum) * _vertexs[0].BPortConnectNum + 1;
-
-                    _calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
-
+                    _switchAdapter.DoSwitch(calBoxAPortID, calBoxBPortID);
+                    //_calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
+                    //_calBoxToMatrix.SetSwitch(calBoxAPortID);
+                    //_calBoxToVertex.SetSwitch(calBoxBPortID);
                     if (Log.log.IsInfoEnabled)
                     {
                         Log.log.InfoFormat("衰减校准阶段切开关 {0}{1} OK。", calBoxAPortID, calBoxBPortID);
                     }
-                    _calBoxToMatrix.SetSwitch(a);
-                    //calBoxToVertex.SetSwitch(c);
+
                     var signalPath = new SignalPath(_calBoxToMatrix.CalBoxData, _data)
                     {
                         APortID = a,
@@ -203,6 +203,7 @@ namespace System.Matrix
         {
             try
             {
+                _switchAdapter = new SwitchAdapter(_calBoxToMatrix, _calBoxToVertex);
                 Thread getCalBoxDatasThread = new Thread((calBoxToMatrix) =>
                 {
                     (calBoxToMatrix as CalBoxToMatrix).GetCalBoxData();
@@ -275,8 +276,6 @@ namespace System.Matrix
                         for (int b = 1; b <= _matrix.BPortConnectNum; b++)
                         {
                             //下行
-                            //vertex.OpenChannel(b, 1, UpDown.DOWN);
-                            //vertexs[b / AppConfigInfo.VertexAConnectNum].OpenChannel(b % AppConfigInfo.VertexAConnectNum, 1, UpDown.DOWN);
                             var vertexID = (b - 1) / _vertexs[0].APortConnectNum;
                             var inPortID = (b - 1) % _vertexs[0].APortConnectNum + 1;
                             var outPortID = 1;
@@ -292,15 +291,15 @@ namespace System.Matrix
                             {
                                 var calBoxAPortID = a;
                                 var calBoxBPortID = ((b - 1) / _vertexs[0].APortConnectNum) * _vertexs[0].BPortConnectNum + 1;
-                                _calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
+                                //_calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
+                                //_switch.DoSwitch(calBoxAPortID, calBoxBPortID);
+                                _switchAdapter.DoSwitch(calBoxAPortID, calBoxBPortID);
                                 if (Log.log.IsInfoEnabled)
                                 {
                                     Log.log.InfoFormat("相位校准阶段切开关 {0}{1} OK。", calBoxAPortID, calBoxBPortID);
                                 }
                                 _signalPaths.Find(s => s.Index.Equals($"{a}:{b}:1")).Phase = _VNA.GetMarkerY(_VNA.PhaMarkPoint);
                             }
-                            //vertex.CloseChannel(b, 1, UpDown.DOWN);
-                            //vertexs[b / AppConfigInfo.VertexAConnectNum].CloseChannel(b % AppConfigInfo.VertexAConnectNum, 1, UpDown.DOWN);
                             _vertexs[vertexID].CloseChannel(inPortID, outPortID, UpDown.DOWN);
 
                             if (Log.log.IsInfoEnabled)
@@ -547,5 +546,6 @@ namespace System.Matrix
                 throw ex;
             }
         }
+
     }
 }

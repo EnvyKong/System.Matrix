@@ -1,5 +1,4 @@
-﻿using TopYoung.MV.Core;
-
+﻿
 namespace System.Matrix
 {
     public interface IVectorNetworkAnalyzer : IConnected
@@ -7,8 +6,6 @@ namespace System.Matrix
         /// <summary>
         /// 读取IDN
         /// </summary>
-        /// <param name="IDN">设备IDN</param>
-        /// <returns>是否读取成功</returns>
         bool ReadIDN(out string IDN);
 
         /// <summary>
@@ -50,24 +47,13 @@ namespace System.Matrix
         /// 设置扫频点数
         /// </summary>
         void SetSegmentPoint(int Points);
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="StartFreq"></param>
-        /// <param name="StopFreq"></param>
-        /// <param name="Points"></param>
-        /// <param name="Power"></param>
-        /// <param name="SegmentTime"></param>
-        /// <param name="Unused"></param>
-        /// <param name="MeasBandwidth"></param>
-        void SetSegmentFreqIns(string StartFreq, string StopFreq, int Points, string Power, string SegmentTime, string Unused, string MeasBandwidth);
 
+        void SetSegmentFreqIns(string StartFreq, string StopFreq, int Points, string Power, string SegmentTime, string Unused, string MeasBandwidth);
 
         /// <summary>
         /// 激活分段扫描：
         /// </summary>
         void ActiveSegmentFreq();
-
 
         /// <summary>
         /// 获取仪表支持的最小的频点,单位转换为MHz
@@ -81,33 +67,26 @@ namespace System.Matrix
         /// <returns>单位为MHz</returns>
         double GetFREQMAX();
 
-
         /// <summary>
         /// 加载文件
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">路径</param>
         void LoadFile(string filePath);
-
 
         /// <summary>
         /// 存储文件
         /// </summary>
-        /// <param name="filePath"></param>
+        /// <param name="filePath">路径</param>
         void StoreFile(string filePath);
-
 
         /// <summary>
         /// 设置Trace数量
         /// </summary>
-        /// <param name="channel"></param>
-        /// <param name="traceNum"></param>
         void SetTraceNumber(int channel, int traceNum);
 
         /// <summary>
         /// 新增Trace 以及绑定的 sParameter
         /// </summary>
-        /// <param name="trace"></param>
-        /// <param name="format"></param>
         void SetTrace(string trace, string sParameter);
 
         /// <summary>
@@ -118,33 +97,26 @@ namespace System.Matrix
         /// <summary>
         /// 设置起始频率
         /// </summary>
-        /// <param name="freq"></param>
         void SetStartFreq(string freq);
 
         /// <summary>
         /// 设置终止频率
         /// </summary>
-        /// <param name="freq"></param>
         void SetStopFreq(string freq);
 
         /// <summary>
         /// 设置AGC
         /// </summary>
-        /// <param name="freq"></param>
         void SetAGC_MANual();
 
-
         /// <summary>
         /// 设置AGC
         /// </summary>
-        /// <param name="freq"></param>
         void SetAGC_Auto();
 
-
         /// <summary>
         /// 设置AGC
         /// </summary>
-        /// <param name="freq"></param>
         void SetAGC_LNO();
 
         void SelectFormat(string format);

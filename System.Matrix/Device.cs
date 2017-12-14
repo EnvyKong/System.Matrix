@@ -2,12 +2,11 @@
 using System.Net;
 using System.Text;
 using System.Net.NetworkInformation;
-using TopYoung.MV.Core;
 using System.Windows.Forms;
 
 namespace System.Matrix
 {
-    public abstract class Device : TcpClient, IConnected, IIndexer, ICalibratable
+    public abstract class Device : TcpClient, ICalibratable
     {
         public IEntryData EntryData { get; }
 

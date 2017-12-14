@@ -411,7 +411,7 @@ namespace System.Matrix
         }
     }
 
-    public abstract class CalBox : Device
+    public abstract class CalBox : Device, ISwitch
     {
         public CalBox(IEntryData data) : base(data)
         {
@@ -420,7 +420,7 @@ namespace System.Matrix
 
         public CalBoxData CalBoxData { get; set; }
 
-        public void SetSwitch(int portNumID)
+        protected void SetSwitch(int portNumID)
         {
             var sw1 = (portNumID / 8) + 1;
             var swx = portNumID % 8;
@@ -441,26 +441,8 @@ namespace System.Matrix
 
         private string CutSwitch(int switchID, int pin)
         {
-            //string[] strMsg = new string[1];
-            //strMsg[0] = "SETSW:" + switchID.ToString() + ":" + pin.ToString();
-            //SendCommand((int)UserCmd.SET, strMsg);
-            ////Thread.Sleep(200);
-            //if (_setValueInterval < 0)
-            //{
-            //    if (WaitCmdResponse((int)UserCmd.SET, 1000))
-            //    {
-            //        return CommonDataArr[(int)UserCmd.SET].GetData();
-            //    }
-            //    else
-            //    {
-            //        return "";
-            //    }
-            //}
-            //else
-            //{
-            //    Thread.Sleep(_setValueInterval);
+            Cmd = "SETSW:" + switchID.ToString() + ":" + pin.ToString();
             return "";
-            //}
         }
 
         internal string RouteChangeTo(int v1, int v2)
@@ -523,6 +505,11 @@ namespace System.Matrix
                 }
             }
         }
+
+        public virtual void DoSwitch(int aPort, int bPort)
+        {
+            Set64B16Switch(aPort, bPort, 1, 1);
+        }
         //result.TrimEnd(new char[] { '\'});
         //Random r = new Random();
         //for (int n = 1; n <= 80; n++)
@@ -552,127 +539,9 @@ namespace System.Matrix
         //calBoxToMatrix.ReadCB(out string result);
         //string result = File.ReadAllText("1.txt");
         //result.Replace("\r\n", "");
-        #region MyRegion
-        //if (result != "FAIL" && result != "")
-        //{
-        //    if (result.Contains(','))
-        //    {
-        //        //CalBoxIsOld = false;
-        //        string[] calBoxVal = result.Split(';');
-        //        for (int n = 1; n <= calBoxVal.Length; n++)
-        //        {
-        //            //calBoxData.Add(new CalBoxData
-        //            //{
-        //            //    Index = index,
-        //            //    Phase = Convert.ToDouble(calBoxVal[i]),
-        //            //    Attenuation = -1
-        //            //});
-        //            if (n >= 1 && n <= 16)
-        //            {
-        //                CalBoxData.APortsDatas.Add(new PortData()
-        //                {
-        //                    Phase = Convert.ToDouble(calBoxVal[n - 1].Split(',')[2]),
-        //                    Attenuation = -1
-        //                });
-        //            }
-        //            else if (n >= 17 && n <= 24)
-        //            {
-        //                CalBoxData.BPortsDatas.Add(new PortData()
-        //                {
-        //                    Phase = Convert.ToDouble(calBoxVal[n - 1].Split(',')[2]),
-        //                    Attenuation = -1
-        //                });
-        //            }
-        //        }
-        //        //for (int i = 0; i < calBoxVal.Length; i++)
-        //        //{
-        //        //calBoxData.Add(new CalBoxData
-        //        //{
-        //        //    Index = index,
-        //        //    Phase = Convert.ToDouble(calBoxVal[i].Split(',')[0]),
-        //        //    Attenuation = -1
-        //        //});
-        //        //_calBoxData[i + portabNum].Data = Convert.ToDouble(calBoxVal[i].Split(',')[1]);
-        //        //}
-        //    }
-        //    else
-        //    {
-        //        //CalBoxIsOld = true;
-        //        string[] calBoxVal = result.Split(';');
-        //        for (int n = 1; n <= calBoxVal.Length; n++)
-        //        {
-        //            //calBoxData.Add(new CalBoxData
-        //            //{
-        //            //    Index = index,
-        //            //    Phase = Convert.ToDouble(calBoxVal[i]),
-        //            //    Attenuation = -1
-        //            //});
-        //            if (n >= 1 && n <= 64)
-        //            {
-        //                CalBoxData.APortsDatas.Add(new PortData()
-        //                {
-        //                    Phase = Convert.ToDouble(calBoxVal[n]),
-        //                    Attenuation = -1
-        //                });
-        //            }
-        //            else if (n >= 65 && n <= 80)
-        //            {
-        //                CalBoxData.BPortsDatas.Add(new PortData()
-        //                {
-        //                    Phase = Convert.ToDouble(calBoxVal[n]),
-        //                    Attenuation = -1
-        //                });
-        //            }
-        //        }
-        //    }
-        //}
-        #endregion
-    }
 
-    public class CalBoxToMatrix : CalBox
-    {
-        public CalBoxToMatrix(IEntryData data) : base(data)
+        private void Set64B16Switch(int portanum, int portbnum, int switchD, int switchB)
         {
-
-        }
-
-        public void Set64B16Switch(int a, int b)
-        {
-            if (!RouteChangeTo(1, Convert.ToInt32(a)).Contains("OK"))
-            {
-                MessageBox.Show("失败");
-            }
-            if (!RouteChangeTo(2, Convert.ToInt32(b)).Contains("OK"))
-            {
-                MessageBox.Show("失败");
-            }
-        }
-
-        //internal void Set64B16Switch(int aPortID, int cPortID, int v1, int v2)
-        //{
-        //    throw new NotImplementedException();
-        //}
-
-        public void Set64B16Switch(int portanum, int portbnum, int switchD, int switchB)
-        {
-            //此处为什么强行切  开关9，和，10  ==》开关示意图如下
-            /*
-            ---
-            |1|
-            ---                                            ----
-            ---                                            |11|
-            |2|                                            ----
-            ---
-            ---                   -----       ----
-            |3|                   | 9 |       |10|
-            ---                   -----       ----
-             :
-             :                                             ----
-            ---                                            |12|
-            |8|                                            ----
-            ---
-
-             */
             #region 选择单刀8开关
             if (portanum > 8 && portanum <= 16)
             {
@@ -865,11 +734,48 @@ namespace System.Matrix
         }
     }
 
-    public class CalBoxToVertex : CalBox
+    public class CalBoxToMatrix : CalBox
+    {
+        public CalBoxToMatrix(IEntryData data) : base(data)
+        {
+
+        }
+
+        public override void DoSwitch(int aPort, int bPort)
+        {
+            SetSwitch(aPort);
+        }
+
+        public void Set64B16Switch(int a, int b)
+        {
+            if (!RouteChangeTo(1, Convert.ToInt32(a)).Contains("OK"))
+            {
+                MessageBox.Show("失败");
+            }
+            if (!RouteChangeTo(2, Convert.ToInt32(b)).Contains("OK"))
+            {
+                MessageBox.Show("失败");
+            }
+        }
+    }
+
+    public class CalBoxToVertex : CalBox, ISwitch
     {
         public CalBoxToVertex(IEntryData data) : base(data)
         {
 
+        }
+
+        public override void DoSwitch(int aPort, int bPort)
+        {
+            if (Connected)
+            {
+                SetSwitch(bPort);
+            }
+            else
+            {
+                base.DoSwitch(aPort, bPort);
+            }
         }
     }
 }

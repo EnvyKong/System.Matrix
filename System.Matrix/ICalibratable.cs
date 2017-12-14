@@ -2,10 +2,9 @@
 
 namespace System.Matrix
 {
-    interface ICalibratable
+    public interface ICalibratable : IConnected
     {
         int this[int a, int b] { get; }
-        string Name { get; }
         int Quantity { get; }
         int APortNum { get; }
         int BPortNum { get; }
@@ -16,9 +15,5 @@ namespace System.Matrix
         string IP { get; }
         IPAddress IPAddress { get; }
         int PortNum { get; }
-        void Connect();
-        string Send(string cmd);
-        bool Connected { get; set; }
-        void Close();
     }
 }

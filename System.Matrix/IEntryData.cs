@@ -1,6 +1,6 @@
 ﻿namespace System.Matrix
 {
-    public interface IEntryData
+    public interface IEntryData : ICalibratable
     {
         string IPToMatrix { get; }
         string IPToVNA { get; }

@@ -1,7 +1,7 @@
 ﻿namespace System.Matrix
 {
-    interface ICalibrate
+    public interface ICalibrate
     {
-        void Calibrate(ICalibratable obj);
+        void Calibrate();
     }
 }
