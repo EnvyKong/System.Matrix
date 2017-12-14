@@ -12,13 +12,17 @@ namespace System.Matrix
 
         public override bool Connected { get; set; }
 
+        public int PhaMarkPoint => (int)EntryData.GetPropertyValue("PhaMarkPoint");
+
+        public int AttMarkPoint => (int)EntryData.GetPropertyValue("AttMarkPoint");
+
         public override void Connect()
         {
             try
             {
                 messageBased = new FormattedIO488();
                 ResourceManager grm = new ResourceManager();//TCPIP0::192.168.8.219::inst0::INSTR
-                messageBased.IO = (IMessage)grm.Open("TCPIP0::" + IP + "::inst0::INSTR", AccessMode.NO_LOCK, 2000, "");
+                messageBased.IO = (IMessage)grm.Open("TCPIP0::" + VNAIP + "::inst0::INSTR", AccessMode.NO_LOCK, 2000, "");
                 messageBased.IO.Timeout = 200000;
                 messageBased.IO.SendEndEnabled = !messageBased.IO.SendEndEnabled;
                 messageBased.IO.TerminationCharacterEnabled = !messageBased.IO.TerminationCharacterEnabled;

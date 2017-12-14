@@ -2,23 +2,23 @@
 {
     public interface IEntryData
     {
-        string IPToMatrix { get; set; }
-        string IPToVNA { get; set; }
-        string IPToVertex1 { get; set; }
-        string IPToVertex2 { get; set; }
-        string IPToCalBoxForMatrix { get; set; }
-        string IPToCalBoxForVertex { get; set; }
+        string IPToMatrix { get; }
+        string IPToVNA { get; }
+        string IPToVertex1 { get; }
+        string IPToVertex2 { get; }
+        string IPToCalBoxForMatrix { get; }
+        string IPToCalBoxForVertex { get; }
 
-        int PortNumToMatrix { get; set; }
-        int PortNumToVNA { get; set; }
-        int PortNumToVertex { get; set; }
-        int PortNumToCalBoxToMatrix { get; set; }
-        int PortNumToCalBoxToVertex { get; set; }
+        int PortNumToMatrix { get; }
+        int PortNumToVNA { get; }
+        int PortNumToVertex { get; }
+        int PortNumToCalBoxToMatrix { get; }
+        int PortNumToCalBoxToVertex { get; }
 
-        long Frequency { get; set; }
-        double AttenuationStep { get; set; }
-        double PhaseStep { get; set; }
-        PhaseStepShiftDirection PhaseStepShiftDirection { get; set; }
+        long Frequency { get; }
+        double AttenuationStep { get; }
+        double PhaseStep { get; }
+        PhaseStepShiftDirection PhaseStepShiftDirection { get; }
 
         int CalBoxToVertexBConnectNum { get; }
         int CalBoxToVertexAConnectNum { get; }

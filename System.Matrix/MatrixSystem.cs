@@ -27,15 +27,22 @@ namespace System.Matrix
         {
             get
             {
-                var devices = new List<IConnected>
+                try
                 {
-                    _matrix,
-                    _calBoxToMatrix,
-                    _calBoxToVertex,
-                    _VNA
-                };
-                devices.AddRange(_vertexs);
-                return devices;
+                    var devices = new List<IConnected>
+                    {
+                        _matrix,
+                        _calBoxToMatrix,
+                        _calBoxToVertex,
+                        _VNA
+                    };
+                    devices.AddRange(_vertexs);
+                    return devices;
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
             }
         }
 
@@ -44,8 +51,8 @@ namespace System.Matrix
             try
             {
                 _matrix = new Matrix(_data);
-                _vertexs = new Vertex[_data.VertexQuantity];
-                for (int i = 1; i <= _data.VertexQuantity; i++)
+                _vertexs = new Vertex[_vertexs[0].Quantity];
+                for (int i = 1; i <= _vertexs[0].Quantity; i++)
                 {
                     var dataType = _data.GetType();
                     var ip = dataType.GetProperty("IPToVertex" + i).ToString();
@@ -63,6 +70,7 @@ namespace System.Matrix
             catch (Exception ex)
             {
                 Log.log.ErrorFormat("{0}", ex);
+                throw ex;
             }
         }
 
@@ -78,6 +86,7 @@ namespace System.Matrix
             catch (Exception ex)
             {
                 Log.log.ErrorFormat("{0}", ex);
+                throw ex;
             }
         }
 
@@ -87,7 +96,7 @@ namespace System.Matrix
             Log.log.Info("Start The Calibration.");
 
             _VNA.SetMarkerActive();
-            _VNA.SetMarkerX(_data.Frequency * 1000000);
+            _VNA.SetMarkerX(_matrix.Frequency * 1000000);
             //关闭Vertex所有通道，后面用哪个打开哪个
             foreach (var v in _vertexs)
             {
@@ -99,8 +108,8 @@ namespace System.Matrix
             {
                 //下行
                 //var groupSignalPaths = new List<SignalPath>();
-                var vertexID = (b - 1) / _data.VertexAConnectNum;
-                var inPortID = (b - 1) % _data.VertexAConnectNum + 1;
+                var vertexID = (b - 1) / _vertexs[0].APortConnectNum;
+                var inPortID = (b - 1) % _vertexs[0].APortConnectNum + 1;
                 var outPortID = 1;
 
                 _vertexs[vertexID].OpenChannel(inPortID, outPortID, UpDown.DOWN);
@@ -113,7 +122,7 @@ namespace System.Matrix
                 for (int a = 1; a <= _matrix.APortConnectNum; a++)
                 {
                     var calBoxAPortID = a;
-                    var calBoxBPortID = ((b - 1) / _data.VertexAConnectNum) * _data.VertexBConnectNum + 1;
+                    var calBoxBPortID = ((b - 1) / _vertexs[0].APortConnectNum) * _vertexs[0].BPortConnectNum + 1;
 
                     _calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
 
@@ -128,7 +137,7 @@ namespace System.Matrix
                         APortID = a,
                         BPortID = b,
                         CPortID = 1,
-                        Attenuation = _VNA.GetMarkerY(_data.AttMarkPoint),
+                        Attenuation = _VNA.GetMarkerY(_VNA.AttMarkPoint),
                     };
                     signalPaths.Add(signalPath);
                 }
@@ -165,19 +174,28 @@ namespace System.Matrix
             catch (Exception ex)
             {
                 Log.log.ErrorFormat("{0}", ex);
+                throw ex;
             }
         }
 
         public void OutputResult(string savePath)
         {
-            for (int a = 1; a <= _matrix.APortConnectNum; a++)
+            try
             {
-                for (int b = 1; b <= _matrix.BPortConnectNum; b++)
+                for (int a = 1; a <= _matrix.APortConnectNum; a++)
                 {
-                    string[] offset = new string[1];
-                    offset[0] = $"{_matrix[a, b]}:{a}:{b}:{_matrix.CurrentPha(_matrix[a, b])}:{_matrix.CurrentAtt(_matrix[a, b])}";
-                    File.AppendAllLines(savePath, offset);
+                    for (int b = 1; b <= _matrix.BPortConnectNum; b++)
+                    {
+                        string[] offset = new string[1];
+                        offset[0] = $"{_matrix[a, b]}:{a}:{b}:{_matrix.CurrentPha(_matrix[a, b])}:{_matrix.CurrentAtt(_matrix[a, b])}";
+                        File.AppendAllLines(savePath, offset);
+                    }
                 }
+            }
+            catch (Exception ex)
+            {
+                Log.log.ErrorFormat("{0}", ex);
+                throw ex;
             }
         }
 
@@ -214,8 +232,8 @@ namespace System.Matrix
                 getCalBoxDatasThread.Join();
                 resetMatrixThread.Join();
 
-                int attCalFre = _data.AttCalFre;
-                int phaCalFre = _data.PhaCalFre;
+                int attCalFre = _matrix.AttCalFre;
+                int phaCalFre = _matrix.PhaCalFre;
                 int maxCalCount = attCalFre > phaCalFre ? attCalFre : phaCalFre;
                 for (int i = 1; i <= maxCalCount; i++)
                 {
@@ -259,8 +277,8 @@ namespace System.Matrix
                             //下行
                             //vertex.OpenChannel(b, 1, UpDown.DOWN);
                             //vertexs[b / AppConfigInfo.VertexAConnectNum].OpenChannel(b % AppConfigInfo.VertexAConnectNum, 1, UpDown.DOWN);
-                            var vertexID = (b - 1) / _data.VertexAConnectNum;
-                            var inPortID = (b - 1) % _data.VertexAConnectNum + 1;
+                            var vertexID = (b - 1) / _vertexs[0].APortConnectNum;
+                            var inPortID = (b - 1) % _vertexs[0].APortConnectNum + 1;
                             var outPortID = 1;
 
                             _vertexs[vertexID].OpenChannel(inPortID, outPortID, UpDown.DOWN);
@@ -273,13 +291,13 @@ namespace System.Matrix
                             for (int a = 1; a <= _matrix.APortConnectNum; a++)
                             {
                                 var calBoxAPortID = a;
-                                var calBoxBPortID = ((b - 1) / _data.VertexAConnectNum) * _data.VertexBConnectNum + 1;
+                                var calBoxBPortID = ((b - 1) / _vertexs[0].APortConnectNum) * _vertexs[0].BPortConnectNum + 1;
                                 _calBoxToMatrix.Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
                                 if (Log.log.IsInfoEnabled)
                                 {
                                     Log.log.InfoFormat("相位校准阶段切开关 {0}{1} OK。", calBoxAPortID, calBoxBPortID);
                                 }
-                                _signalPaths.Find(s => s.Index.Equals($"{a}:{b}:1")).Phase = _VNA.GetMarkerY(_data.PhaMarkPoint);
+                                _signalPaths.Find(s => s.Index.Equals($"{a}:{b}:1")).Phase = _VNA.GetMarkerY(_VNA.PhaMarkPoint);
                             }
                             //vertex.CloseChannel(b, 1, UpDown.DOWN);
                             //vertexs[b / AppConfigInfo.VertexAConnectNum].CloseChannel(b % AppConfigInfo.VertexAConnectNum, 1, UpDown.DOWN);
@@ -339,23 +357,32 @@ namespace System.Matrix
             catch (Exception ex)
             {
                 Log.log.ErrorFormat("{0}", ex);
+                throw ex;
             }
         }
 
         public void CalibrateByFileWithForm()
         {
-            OpenFileDialog loadPhaseOffset = new OpenFileDialog()
+            try
             {
-                Filter = "Text File (*.txt)|*.txt|CSV File (*.csv)|*.csv",
-                Title = "Import Calibration Offset",
-                RestoreDirectory = true,
-                FilterIndex = 1
-            };
-            if (loadPhaseOffset.ShowDialog() != DialogResult.OK)
-            {
-                return;
+                OpenFileDialog loadPhaseOffset = new OpenFileDialog()
+                {
+                    Filter = "Text File (*.txt)|*.txt|CSV File (*.csv)|*.csv",
+                    Title = "Import Calibration Offset",
+                    RestoreDirectory = true,
+                    FilterIndex = 1
+                };
+                if (loadPhaseOffset.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+                CalibrateByFile(loadPhaseOffset.FileName);
             }
-            CalibrateByFile(loadPhaseOffset.FileName);
+            catch (Exception ex)
+            {
+                Log.log.ErrorFormat("{0}", ex);
+                throw ex;
+            }
         }
 
         public void CalibrateByFile(string path)
@@ -375,8 +402,8 @@ namespace System.Matrix
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
                 Log.log.ErrorFormat("{0}", ex);
+                throw ex;
             }
         }
 
@@ -399,6 +426,7 @@ namespace System.Matrix
             }
             catch (Exception ex)
             {
+                Log.log.ErrorFormat("{0}", ex);
                 throw ex;
             }
         }
@@ -433,23 +461,32 @@ namespace System.Matrix
             catch (Exception ex)
             {
                 Log.log.ErrorFormat("{0}", ex);
+                throw ex;
             }
         }
 
         public void SetValueDynamicWithForm()
         {
-            OpenFileDialog loadScene = new OpenFileDialog()
+            try
             {
-                Filter = "CSV File (*.csv)|*.csv",
-                Title = "Load Scene",
-                RestoreDirectory = true,
-                FilterIndex = 1
-            };
-            if (loadScene.ShowDialog() != DialogResult.OK)
-            {
-                return;
+                OpenFileDialog loadScene = new OpenFileDialog()
+                {
+                    Filter = "CSV File (*.csv)|*.csv",
+                    Title = "Load Scene",
+                    RestoreDirectory = true,
+                    FilterIndex = 1
+                };
+                if (loadScene.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+                SetValueDynamic(loadScene.FileName);
             }
-            SetValueDynamic(loadScene.FileName);
+            catch (Exception ex)
+            {
+                Log.log.ErrorFormat("{0}", ex);
+                throw ex;
+            }
         }
 
         public void SetValueDynamic(string path)
@@ -506,7 +543,8 @@ namespace System.Matrix
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.ToString());
+                Log.log.ErrorFormat("{0}", ex);
+                throw ex;
             }
         }
     }

@@ -33,6 +33,12 @@ namespace System.Matrix
 
         public List<Channel> ChannelList { get; }
 
+        public double AttenuationStep { get => (double)EntryData.GetPropertyValue("AttenuationStep"); }
+
+        public double PhaseStep { get => (double)EntryData.GetPropertyValue("PhaseStep"); }
+        public int AttCalFre { get => (int)EntryData.GetPropertyValue("AttCalFre"); }
+        public int PhaCalFre { get => (int)EntryData.GetPropertyValue("PhaCalFre"); }
+
         private string SetAttCmd(int id, int value)
         {
             Cmd = $"ATT:SHIFt:{id},{value}";

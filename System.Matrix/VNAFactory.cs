@@ -7,7 +7,7 @@ namespace System.Matrix
     {
         public static IVectorNetworkAnalyzer GetVNA(IEntryData data)
         {
-            var vnaType = Type.GetType($"{MethodBase.GetCurrentMethod().DeclaringType.Namespace}.{AppConfigInfo.VNAType}");
+            var vnaType = Type.GetType($"{MethodBase.GetCurrentMethod().DeclaringType.Namespace}.{data.GetPropertyValue("VNAType")}");
             return Activator.CreateInstance(vnaType, data) as IVectorNetworkAnalyzer;
         }
     }

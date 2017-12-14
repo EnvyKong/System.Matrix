@@ -15,6 +15,8 @@ namespace System.Matrix
 
         public string Name { get => GetType().Name; }
 
+        public string BaseName { get => GetType().BaseType.Name; }
+
         public int Quantity { get => (int)EntryData.GetPropertyValue($"{Name}Quantity"); }
 
         public int APortNum { get => (int)EntryData.GetPropertyValue($"{Name}ANum"); }
@@ -24,6 +26,8 @@ namespace System.Matrix
         public int APortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}AConnectNum"); }
 
         public int BPortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}BConnectNum"); }
+
+        public long Frequency { get => (int)EntryData.GetPropertyValue("Frequency"); }
 
         public int this[int aPortID, int bPortID]
         {
@@ -81,7 +85,42 @@ namespace System.Matrix
             }
         }
 
-        public IPAddress IPAddress { get; private set; }
+        public string VNAIP
+        {
+            get
+            {
+                return (string)EntryData.GetPropertyValue($"IPTo{BaseName}");
+            }
+            private set
+            {
+                if (IPAddress.TryParse(value, out IPAddress address))
+                {
+                    IPAddress = address;
+                    _ip = address.ToString();
+                }
+                else
+                {
+                    MessageBox.Show($"{Name} IP Formal Error!");
+                    Log.log.ErrorFormat("{0} IP Formal Error!", Name);
+                }
+                Ping ping = new Ping();
+                var pingReply = ping.Send(address);
+                if (pingReply.Status != IPStatus.Success)
+                {
+                    MessageBox.Show($"{Name} IP Ping Error!");
+                    Log.log.ErrorFormat("{0} IP Ping Error!", Name);
+                }
+            }
+        }
+
+        public IPAddress IPAddress
+        {
+            get
+            {
+                return IPAddress.Parse(IP);
+            }
+            private set { }
+        }
 
         public int PortNum { get => (int)EntryData.GetPropertyValue($"PortNumTo{Name}"); }
 

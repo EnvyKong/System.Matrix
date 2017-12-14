@@ -31,6 +31,10 @@ namespace System.Matrix
 
         public override bool Connected { get; set; }
 
+        public int PhaMarkPoint => (int)EntryData.GetPropertyValue("PhaMarkPoint");
+
+        public int AttMarkPoint => (int)EntryData.GetPropertyValue("AttMarkPoint");
+
         /// <summary>
         /// 连接仪表
         /// </summary>
@@ -42,7 +46,7 @@ namespace System.Matrix
                 #region Socket 连接方式
                 messageBased = new FormattedIO488();
                 ResourceManager grm = new ResourceManager();
-                messageBased.IO = (IMessage)grm.Open("TCPIP0::" + IP + "::5025::SOCKET", AccessMode.NO_LOCK, 2000, "");
+                messageBased.IO = (IMessage)grm.Open("TCPIP0::" + VNAIP + "::5025::SOCKET", AccessMode.NO_LOCK, 2000, "");
                 messageBased.IO.Timeout = 200000;
                 messageBased.IO.SendEndEnabled = !messageBased.IO.SendEndEnabled;
                 messageBased.IO.TerminationCharacterEnabled = !messageBased.IO.TerminationCharacterEnabled;
