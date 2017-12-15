@@ -90,6 +90,7 @@
     <Compile Include="IConnected.cs" />
     <Compile Include="IDeviceMember.cs" />
     <Compile Include="IMatrixSystem.cs" />
+    <Compile Include="IGetEntryData.cs" />
     <Compile Include="ISwitch.cs" />
     <Compile Include="MatrixSystemB.cs" />
     <Compile Include="ICalibratable.cs" />

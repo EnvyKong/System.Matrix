@@ -734,11 +734,17 @@ namespace System.Matrix
         }
     }
 
+    public class CalBoxWhole : CalBox
+    {
+        public CalBoxWhole(IEntryData data) : base(data)
+        {
+        }
+    }
+
     public class CalBoxToMatrix : CalBox
     {
         public CalBoxToMatrix(IEntryData data) : base(data)
         {
-
         }
 
         public override void DoSwitch(int aPort, int bPort)
