@@ -185,7 +185,7 @@ namespace System.Matrix
                     Log.log.InfoFormat("第{0}台Vertex响应。打开通道{1}{2}，方向{3}。", vertexID, inPortID, outPortID, UpDown.DOWN);
                 }
 
-                for (int a = 1; a <= Matrix.APortConnectNum; a++)
+                for (int a = 1 + (b - 1) * (Matrix.APortNum / Matrix.BPortNum); a <= Matrix.APortConnectNum; a++)
                 {
                     var calBoxAPortID = a;
                     var calBoxBPortID = ((b - 1) / Vertexs[0].APortConnectNum) * Vertexs[0].BPortConnectNum + 1;

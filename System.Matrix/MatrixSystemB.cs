@@ -523,8 +523,8 @@ namespace System.Matrix
                         sqls.Add(insertFrameInfo);
                     }
                 }
-                SQLiteHelper.ExecuteSqlTran(addInfoTableSQL);
-                SQLiteHelper.ExecuteInsertSqlTran(sqls);
+                //SQLiteHelper.ExecuteSqlTran(addInfoTableSQL);
+                //SQLiteHelper.ExecuteInsertSqlTran(sqls);
 
                 ftpClient.UploadFile($"{dbFileName}", ftpPath);
 

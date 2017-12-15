@@ -102,7 +102,6 @@
     <Compile Include="Models.cs" />
     <Compile Include="MVExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SQLiteHelper.cs" />
     <Compile Include="SwitchAdapter.cs" />
     <Compile Include="VNA.cs" />
     <Compile Include="VNAE5061B.cs" />
