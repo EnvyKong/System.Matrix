@@ -16,10 +16,12 @@ namespace System.Matrix
 
         private IEntryData _data;
         private Matrix _matrix;
-        private Vertex[] _vertexs;
+        private Vertex _vertex;
+        private List<Vertex> _vertexs;
         private CalBoxToMatrix _calBoxToMatrix;
         private CalBoxToVertex _calBoxToVertex;
-        private SwitchAdapter _switchAdapter;
+        private CalBoxWhole _calBoxWhole;
+        private SwitchAdapter<ISwitch> _switchAdapter;
 
         private IVectorNetworkAnalyzer _VNA;
         private List<SignalPath> _signalPaths;
@@ -35,6 +37,7 @@ namespace System.Matrix
                         _matrix,
                         _calBoxToMatrix,
                         _calBoxToVertex,
+                        _calBoxWhole,
                         _VNA
                     };
                     devices.AddRange(_vertexs);
@@ -52,15 +55,15 @@ namespace System.Matrix
             try
             {
                 _matrix = new Matrix(_data);
-                _vertexs = new Vertex[_vertexs[0].Quantity];
-                for (int i = 1; i <= _vertexs[0].Quantity; i++)
+                _vertex = new Vertex(_data);
+                _vertexs = new List<Vertex>();
+                for (int i = 1; i <= _vertex.IP.Count; i++)
                 {
-                    var dataType = _data.GetType();
-                    var ip = dataType.GetProperty("IPToVertex" + i).ToString();
-                    _vertexs[i] = new Vertex(_data);
+                    _vertexs.Add(new Vertex(_data));
                 }
                 _calBoxToMatrix = new CalBoxToMatrix(_data);
                 _calBoxToVertex = new CalBoxToVertex(_data);
+                _calBoxWhole = new CalBoxWhole(_data);
                 _VNA = VNAFactory.GetVNA(_data);
 
                 foreach (var device in Devices)
@@ -132,7 +135,7 @@ namespace System.Matrix
                         Log.log.InfoFormat("衰减校准阶段切开关 {0}{1} OK。", calBoxAPortID, calBoxBPortID);
                     }
 
-                    var signalPath = new SignalPath(_calBoxToMatrix.CalBoxData, _data)
+                    var signalPath = new SignalPath(_switchAdapter.CalBoxData, _data)
                     {
                         APortID = a,
                         BPortID = b,
@@ -203,10 +206,10 @@ namespace System.Matrix
         {
             try
             {
-                _switchAdapter = new SwitchAdapter(_calBoxToMatrix, _calBoxToVertex);
-                Thread getCalBoxDatasThread = new Thread((calBoxToMatrix) =>
+                _switchAdapter = new SwitchAdapter<ISwitch>(_calBoxToMatrix, _calBoxToVertex, _calBoxWhole);
+                Thread getCalBoxDatasThread = new Thread((calBox) =>
                 {
-                    (calBoxToMatrix as CalBoxToMatrix).GetCalBoxData();
+                    (calBox as SwitchAdapter<ISwitch>).GetCalBoxData();
                 })
                 {
                     CurrentCulture = Globalization.CultureInfo.InvariantCulture,
@@ -214,7 +217,7 @@ namespace System.Matrix
                     IsBackground = true
                 };
                 //获取校准盒子数据
-                getCalBoxDatasThread.Start(_calBoxToMatrix);
+                getCalBoxDatasThread.Start(_switchAdapter);
 
                 Thread resetMatrixThread = new Thread((matrix) =>
                 {
@@ -244,7 +247,7 @@ namespace System.Matrix
                         _signalPaths = GetAllSignalPathData();
                         if (Log.log.IsInfoEnabled)
                         {
-                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", _signalPaths.Count, _vertexs.Length);
+                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", _signalPaths.Count, _vertexs.Count);
                         }
 
                         //找到衰减最小值
@@ -495,7 +498,7 @@ namespace System.Matrix
                 Scene scene = new Scene();
                 scene.LoadSceneData(path, _matrix);
 
-                FtpClient ftpClient = new FtpClient(_matrix.IP, "root", "123456");
+                FtpClient ftpClient = new FtpClient(_matrix.IP[0], "root", "123456");
                 var dbFileName = $"ASP{_matrix.APortNum}B{_matrix.BPortNum}.db";
                 var ftpPath = $"ftp://{_matrix.IP}/media/mmcblk0p1/{dbFileName}";
 
@@ -546,6 +549,5 @@ namespace System.Matrix
                 throw ex;
             }
         }
-
     }
 }

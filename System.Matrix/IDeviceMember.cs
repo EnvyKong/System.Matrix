@@ -1,15 +1,19 @@
-﻿namespace System.Matrix
+﻿using System.Collections.Generic;
+
+namespace System.Matrix
 {
     public interface IDeviceMember
     {
         IEntryData EntryData { get; }
 
         IVectorNetworkAnalyzer VNA { get; set; }
-        ICalibratable Matrix { get; set; }
-        ICalibratable[] Vertexs { get; set; }
-        ICalibratable CalBoxToMatrix { get; set; }
-        ICalibratable CalBoxToVertex { get; set; }
+        Matrix Matrix { get; set; }
+        Vertex Vertex { get; set; }
+        List<Vertex> Vertexs { get; set; }
+        CalBoxToMatrix CalBoxToMatrix { get; set; }
+        CalBoxToVertex CalBoxToVertex { get; set; }
+        CalBoxWhole CalBoxWhole { get; set; }
 
-        SwitchAdapter SwitchAdapter { get; set; }
+        SwitchAdapter<ISwitch> SwitchAdapter { get; set; }
     }
 }

@@ -1,14 +1,16 @@
 ﻿namespace System.Matrix
 {
-    public class SwitchAdapter : ISwitch
+    public class SwitchAdapter<TSwitch> : ISwitch where TSwitch : ISwitch
     {
-        private ISwitch _aSwitch;
-        private ISwitch _bSwitch;
+        private TSwitch _calBoxToMatrix;
+        private TSwitch _calBoxToVertex;
+        private TSwitch _calBoxWhole;
 
-        public SwitchAdapter(ISwitch aSwitch, ISwitch bSwitch)
+        public SwitchAdapter(TSwitch calBoxToMatrix, TSwitch calBoxToVertex, TSwitch calBoxWhole)
         {
-            _aSwitch = aSwitch;
-            _bSwitch = bSwitch;
+            _calBoxToMatrix = calBoxToMatrix;
+            _calBoxToVertex = calBoxToVertex;
+            _calBoxWhole = calBoxWhole;
         }
 
         public bool Connected => throw new NotImplementedException();
@@ -17,14 +19,35 @@
 
         public void DoSwitch(int aPort, int bPort)
         {
-            if (_aSwitch.Connected & _bSwitch.Connected)
+            if (_calBoxToMatrix.Connected & _calBoxToVertex.Connected)
             {
-                _aSwitch.DoSwitch(aPort, bPort);
-                _bSwitch.DoSwitch(aPort, bPort);
+                _calBoxToMatrix.DoSwitch(aPort, bPort);
+                _calBoxToVertex.DoSwitch(aPort, bPort);
             }
-            else if (_aSwitch.Connected & (!_bSwitch.Connected))
+            else if (_calBoxWhole.Connected)
             {
-                _bSwitch.DoSwitch(aPort, bPort);
+                _calBoxWhole.DoSwitch(aPort, bPort);
+            }
+            else
+            {
+                throw new Exception("Switch connect error.");
+            }
+        }
+
+        public CalBoxData GetCalBoxData()
+        {
+            if (_calBoxToMatrix.Connected & _calBoxToVertex.Connected)
+            {
+                _calBoxToMatrix.GetCalBoxData();
+                _calBoxToVertex.GetCalBoxData();
+
+                return CalBoxData;
+            }
+            else if (_calBoxWhole.Connected)
+            {
+                CalBoxData = _calBoxWhole.GetCalBoxData();
+
+                return CalBoxData;
             }
             else
             {

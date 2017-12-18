@@ -1,6 +1,6 @@
 ﻿namespace System.Matrix
 {
-    interface IScene
+    public interface IScene
     {
         void GetDBFile();
     }

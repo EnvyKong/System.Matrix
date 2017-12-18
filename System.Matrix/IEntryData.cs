@@ -1,13 +1,14 @@
-﻿namespace System.Matrix
+﻿using System.Collections.Generic;
+
+namespace System.Matrix
 {
     public interface IEntryData
     {
-        string IPToMatrix { get; }
+        List<string> IPToMatrix { get; }
         string IPToVNA { get; }
-        string IPToVertex1 { get; }
-        string IPToVertex2 { get; }
-        string IPToCalBoxForMatrix { get; }
-        string IPToCalBoxForVertex { get; }
+        List<string> IPToVertex { get; }
+        List<string> IPToCalBoxToMatrix { get; }
+        List<string> IPToCalBoxToVertex { get; }
 
         int PortNumToMatrix { get; }
         int PortNumToVNA { get; }
@@ -24,27 +25,28 @@
         int CalBoxToVertexAConnectNum { get; }
         int CalBoxToVertexBNum { get; }
         int CalBoxToVertexANum { get; }
-        int CalBoxToVertexQuantity { get; }
 
         int CalBoxToMatrixBConnectNum { get; }
         int CalBoxToMatrixAConnectNum { get; }
         int CalBoxToMatrixBNum { get; }
         int CalBoxToMatrixANum { get; }
-        int CalBoxToMatrixQuantity { get; }
 
-        string VNAType { get; }
+        int CalBoxWholeBConnectNum { get; }
+        int CalBoxWholeAConnectNum { get; }
+        int CalBoxWholeBNum { get; }
+        int CalBoxWholeANum { get; }
+
+        VNAType VNAType { get; }
 
         int VertexBConnectNum { get; }
         int VertexAConnectNum { get; }
         int VertexBNum { get; }
         int VertexANum { get; }
-        int VertexQuantity { get; }
 
         int MatrixBConnectNum { get; }
         int MatrixAConnectNum { get; }
         int MatrixBNum { get; }
         int MatrixANum { get; }
-        int MatrixQuantity { get; }
 
         int PhaMarkPoint { get; }
         int AttMarkPoint { get; }

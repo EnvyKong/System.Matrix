@@ -415,7 +415,7 @@ namespace System.Matrix
     {
         public CalBox(IEntryData data) : base(data)
         {
-
+            CalBoxData = new CalBoxData();
         }
 
         public CalBoxData CalBoxData { get; set; }
@@ -457,9 +457,59 @@ namespace System.Matrix
             return Send(Cmd);
         }
 
-        public void GetCalBoxData()
+        public virtual void DoSwitch(int aPort, int bPort)
         {
-            CalBoxData = new CalBoxData();
+            throw new NotImplementedException();
+        }
+
+        public virtual CalBoxData GetCalBoxData()
+        {
+            throw new NotImplementedException();
+        }
+        //result.TrimEnd(new char[] { '\'});
+        //Random r = new Random();
+        //for (int n = 1; n <= 80; n++)
+        //{
+        //    if (n >= 1 && n <= 64)
+        //    {
+        //        calBoxData.LeftPortDatas.Add(new PortData()
+        //        {
+        //            PortID = n,
+        //            Phase = r.Next(-180, 180),
+        //            Attenuation = -1
+        //        });
+        //    }
+        //    else if (n >= 65 && n <= 80)
+        //    {
+        //        calBoxData.RightPortDatas.Add(new PortData()
+        //        {
+        //            PortID = n,
+        //            Phase = r.Next(-180, 180),
+        //            Attenuation = -1
+        //        });
+        //    }
+        //}
+        //return calBoxData;
+
+        //Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en", true);
+        //calBoxToMatrix.ReadCB(out string result);
+        //string result = File.ReadAllText("1.txt");
+        //result.Replace("\r\n", "");
+    }
+
+    public class CalBoxWhole : CalBox
+    {
+        public CalBoxWhole(IEntryData data) : base(data)
+        {
+        }
+
+        public override void DoSwitch(int aPort, int bPort)
+        {
+            Set64B16Switch(aPort, bPort, 1, 1);
+        }
+
+        public override CalBoxData GetCalBoxData()
+        {
             string result = GetCalBoxDataCmd((int)EntryData.Frequency * 1000);
             result.Replace("\r\n", "");
             string[] calBoxVal = result.Split(':')[2].Split(';');
@@ -504,41 +554,8 @@ namespace System.Matrix
                     }
                 }
             }
+            return CalBoxData;
         }
-
-        public virtual void DoSwitch(int aPort, int bPort)
-        {
-            Set64B16Switch(aPort, bPort, 1, 1);
-        }
-        //result.TrimEnd(new char[] { '\'});
-        //Random r = new Random();
-        //for (int n = 1; n <= 80; n++)
-        //{
-        //    if (n >= 1 && n <= 64)
-        //    {
-        //        calBoxData.LeftPortDatas.Add(new PortData()
-        //        {
-        //            PortID = n,
-        //            Phase = r.Next(-180, 180),
-        //            Attenuation = -1
-        //        });
-        //    }
-        //    else if (n >= 65 && n <= 80)
-        //    {
-        //        calBoxData.RightPortDatas.Add(new PortData()
-        //        {
-        //            PortID = n,
-        //            Phase = r.Next(-180, 180),
-        //            Attenuation = -1
-        //        });
-        //    }
-        //}
-        //return calBoxData;
-
-        //Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("en", true);
-        //calBoxToMatrix.ReadCB(out string result);
-        //string result = File.ReadAllText("1.txt");
-        //result.Replace("\r\n", "");
 
         private void Set64B16Switch(int portanum, int portbnum, int switchD, int switchB)
         {
@@ -734,13 +751,6 @@ namespace System.Matrix
         }
     }
 
-    public class CalBoxWhole : CalBox
-    {
-        public CalBoxWhole(IEntryData data) : base(data)
-        {
-        }
-    }
-
     public class CalBoxToMatrix : CalBox
     {
         public CalBoxToMatrix(IEntryData data) : base(data)
@@ -750,6 +760,15 @@ namespace System.Matrix
         public override void DoSwitch(int aPort, int bPort)
         {
             SetSwitch(aPort);
+        }
+
+        public override CalBoxData GetCalBoxData()
+        {
+            string result = GetCalBoxDataCmd((int)EntryData.Frequency * 1000);
+            result.Replace("\r\n", "");
+            string[] calBoxVal = result.Split(':')[2].Split(';');
+
+            return CalBoxData;
         }
 
         public void Set64B16Switch(int a, int b)
@@ -765,23 +784,24 @@ namespace System.Matrix
         }
     }
 
-    public class CalBoxToVertex : CalBox, ISwitch
+    public class CalBoxToVertex : CalBox
     {
         public CalBoxToVertex(IEntryData data) : base(data)
         {
-
         }
 
         public override void DoSwitch(int aPort, int bPort)
         {
-            if (Connected)
-            {
-                SetSwitch(bPort);
-            }
-            else
-            {
-                base.DoSwitch(aPort, bPort);
-            }
+            SetSwitch(bPort);
+        }
+
+        public override CalBoxData GetCalBoxData()
+        {
+            string result = GetCalBoxDataCmd((int)EntryData.Frequency * 1000);
+            result.Replace("\r\n", "");
+            string[] calBoxVal = result.Split(':')[2].Split(';');
+
+            return CalBoxData;
         }
     }
 }

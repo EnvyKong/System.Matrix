@@ -271,4 +271,13 @@ namespace System.Matrix
             }
         }
     }
+
+    public enum VNAType
+    {
+        Kesight_E5072A,
+        Kesight_E5071C,
+        Kesight_E5070B,
+        Kesight_N522A,
+        RS_ZNB8
+    }
 }

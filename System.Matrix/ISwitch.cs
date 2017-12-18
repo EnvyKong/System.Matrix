@@ -5,5 +5,7 @@
         void DoSwitch(int aPort, int bPort);
         bool Connected { get; }
         CalBoxData CalBoxData { get; set; }
+
+        CalBoxData GetCalBoxData();
     }
 }

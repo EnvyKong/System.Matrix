@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -14,17 +15,19 @@ namespace System.Matrix
         public IEntryData EntryData { get; }
 
         public IVectorNetworkAnalyzer VNA { get; set; }
-        public ICalibratable Matrix { get; set; }
-        public ICalibratable[] Vertexs { get; set; }
-        public ICalibratable CalBoxToMatrix { get; set; }
-        public ICalibratable CalBoxToVertex { get; set; }
-        public SwitchAdapter SwitchAdapter { get; set; }
+        public Matrix Matrix { get; set; }
+        public Vertex Vertex { get; set; }
+        public List<Vertex> Vertexs { get; set; }
+        public CalBoxToMatrix CalBoxToMatrix { get; set; }
+        public CalBoxToVertex CalBoxToVertex { get; set; }
+        public CalBoxWhole CalBoxWhole { get; set; }
+        public SwitchAdapter<ISwitch> SwitchAdapter { get; set; }
 
         public void Calibrate()
         {
             try
             {
-                SwitchAdapter = new SwitchAdapter(CalBoxToMatrix as ISwitch, CalBoxToVertex as ISwitch);
+                SwitchAdapter = new SwitchAdapter<ISwitch>(CalBoxToMatrix, CalBoxToVertex, CalBoxWhole);
                 var _signalPaths = new List<SignalPath>();
                 Thread getCalBoxDatasThread = new Thread((calBoxToMatrix) =>
                 {
@@ -66,7 +69,7 @@ namespace System.Matrix
                         _signalPaths = GetAllSignalPathData();
                         if (Log.log.IsInfoEnabled)
                         {
-                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", _signalPaths.Count, Vertexs.Length);
+                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", _signalPaths.Count, Vertexs.Count);
                         }
 
                         //找到衰减最小值
@@ -199,7 +202,7 @@ namespace System.Matrix
                     }
                     //(CalBoxToMatrix as CalBoxToMatrix).SetSwitch(a);
                     //calBoxToVertex .SetSwitch(c);
-                    var signalPath = new SignalPath((CalBoxToMatrix as CalBoxToMatrix).CalBoxData, EntryData)
+                    var signalPath = new SignalPath(SwitchAdapter.CalBoxData, EntryData)
                     {
                         APortID = a,
                         BPortID = b,
@@ -228,21 +231,22 @@ namespace System.Matrix
             try
             {
                 Matrix = new Matrix(EntryData);
-                Vertexs = new Vertex[Vertexs[0].Quantity];
-                for (int i = 1; i <= Vertexs[0].Quantity; i++)
+                Vertex = new Vertex(EntryData);
+                Vertexs = new List<Vertex>();
+                for (int i = 0; i < Vertex.IP.Count; i++)
                 {
-                    var dataType = EntryData.GetType();
-                    var ip = dataType.GetProperty("IPToVertex" + i).ToString();
-                    Vertexs[i] = new Vertex(EntryData);
+                    Vertexs.Add(new Vertex(EntryData));
                 }
                 CalBoxToMatrix = new CalBoxToMatrix(EntryData);
                 CalBoxToVertex = new CalBoxToVertex(EntryData);
+                CalBoxWhole = new CalBoxWhole(EntryData);
                 VNA = VNAFactory.GetVNA(EntryData);
 
                 Matrix.Connect();
-                Vertexs.ForEach(D => D.Connect());
+                Vertexs.ForEach(v => v.Connect());
                 CalBoxToMatrix.Connect();
                 CalBoxToVertex.Connect();
+                CalBoxWhole.Connect();
                 VNA.Connect();
             }
             catch (Exception ex)
@@ -257,9 +261,10 @@ namespace System.Matrix
             try
             {
                 Matrix.Close();
-                Vertexs.ForEach(D => D.Close());
+                Vertexs.ForEach(v => v.Close());
                 CalBoxToMatrix.Close();
                 CalBoxToVertex.Close();
+                CalBoxWhole.Close();
                 VNA.Close();
             }
             catch (Exception ex)
@@ -269,14 +274,25 @@ namespace System.Matrix
             }
         }
 
-        public void Initialize()
-        {
-            throw new NotImplementedException();
-        }
-
         public void OutputResult(string savePath)
         {
-            throw new NotImplementedException();
+            try
+            {
+                for (int a = 1; a <= Matrix.APortConnectNum; a++)
+                {
+                    for (int b = 1; b <= Matrix.BPortConnectNum; b++)
+                    {
+                        string[] offset = new string[1];
+                        offset[0] = $"{Matrix[a, b]}:{a}:{b}:{Matrix.CurrentPha(Matrix[a, b])}:{Matrix.CurrentAtt(Matrix[a, b])}";
+                        File.AppendAllLines(savePath, offset);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.log.ErrorFormat("{0}", ex);
+                throw ex;
+            }
         }
 
         public void SetValueDynamic(string path)
@@ -286,7 +302,36 @@ namespace System.Matrix
 
         public void SetValueStatic(string path)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var channels = new List<Channel>();
+                if (path.ToLower().EndsWith(".txt"))
+                {
+                    Matrix.LoadOffsets(path, out channels);
+                }
+                else if (path.ToLower().EndsWith(".csv"))
+                {
+                    Scene scene = new Scene();
+                    scene.LoadSceneData(path, Matrix);
+                    foreach (var frame in scene.Frames)
+                    {
+                        foreach (var channel in frame.ChannelToMatrixCollection)
+                        {
+                            channels.Add(new Channel(channel.APortID, channel.BPortID)
+                            {
+                                PhaOffset = channel.PhaOffset
+                            });
+                        }
+                    }
+                }
+                Matrix.SetPha(channels, false);
+                Log.log.Info("Play successfully!");
+            }
+            catch (Exception ex)
+            {
+                Log.log.ErrorFormat("{0}", ex);
+                throw ex;
+            }
         }
     }
 }
