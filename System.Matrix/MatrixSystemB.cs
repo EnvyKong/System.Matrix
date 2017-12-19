@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace System.Matrix
@@ -207,35 +207,43 @@ namespace System.Matrix
             try
             {
                 _switchAdapter = new SwitchAdapter<ISwitch>(_calBoxToMatrix, _calBoxToVertex, _calBoxWhole);
-                Thread getCalBoxDatasThread = new Thread((calBox) =>
+                TaskFactory taskFactory = new TaskFactory();
+                Task[] tasks = new Task[]
                 {
-                    (calBox as SwitchAdapter<ISwitch>).GetCalBoxData();
-                })
-                {
-                    CurrentCulture = Globalization.CultureInfo.InvariantCulture,
-                    Name = "子线程：获取校准盒子数据。",
-                    IsBackground = true
+                    taskFactory.StartNew(_switchAdapter.GetCalBoxData),
+                    taskFactory.StartNew(_matrix.ResetAttAndPha)
                 };
-                //获取校准盒子数据
-                getCalBoxDatasThread.Start(_switchAdapter);
+                taskFactory.ContinueWhenAll(tasks, TasksEnded);
+                #region used Thread
+                //Thread getCalBoxDatasThread = new Thread((calBox) =>
+                //{
+                //    (calBox as SwitchAdapter<ISwitch>).GetCalBoxData();
+                //})
+                //{
+                //    CurrentCulture = Globalization.CultureInfo.InvariantCulture,
+                //    Name = "子线程：获取校准盒子数据。",
+                //    IsBackground = true
+                //};
+                ////获取校准盒子数据
+                //getCalBoxDatasThread.Start(_switchAdapter);
 
-                Thread resetMatrixThread = new Thread((matrix) =>
-                {
-                    var m = matrix as Matrix;
-                    m.ResetAttAndPha();
-                })
-                {
-                    CurrentCulture = Globalization.CultureInfo.InvariantCulture,
-                    Name = "子线程：设置MCS衰减相位归零。",
-                    IsBackground = true
-                };
-                //相位衰减置零
-                resetMatrixThread.Start(_matrix);
+                //Thread resetMatrixThread = new Thread((matrix) =>
+                //{
+                //    var m = matrix as Matrix;
+                //    m.ResetAttAndPha();
+                //})
+                //{
+                //    CurrentCulture = Globalization.CultureInfo.InvariantCulture,
+                //    Name = "子线程：设置MCS衰减相位归零。",
+                //    IsBackground = true
+                //};
+                ////相位衰减置零
+                //resetMatrixThread.Start(_matrix);
 
-                //等待子线程完成任务
-                getCalBoxDatasThread.Join();
-                resetMatrixThread.Join();
-
+                ////等待子线程完成任务
+                //getCalBoxDatasThread.Join();
+                //resetMatrixThread.Join();
+                #endregion
                 int attCalFre = _matrix.AttCalFre;
                 int phaCalFre = _matrix.PhaCalFre;
                 int maxCalCount = attCalFre > phaCalFre ? attCalFre : phaCalFre;
@@ -253,18 +261,28 @@ namespace System.Matrix
                         //找到衰减最小值
                         SignalPath.ExpectAttStandard = _signalPaths.Select(s => s.Attenuation).Min();
 
-                        Thread setMatrixAttThread = new Thread((matrix) =>
+                        Task taskSetMatrixAtt = new Task(() =>
                         {
-                            var m = matrix as Matrix;
-                            m.SetAtt(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
-                        })
-                        {
-                            CurrentCulture = Globalization.CultureInfo.InvariantCulture,
-                            Name = "子线程：设置MCS补偿衰减。",
-                            IsBackground = true
-                        };
-                        setMatrixAttThread.Start(_matrix);
-                        setMatrixAttThread.Join();
+                            _matrix.SetAtt(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
+                        });
+                        taskSetMatrixAtt.Start();
+                        taskSetMatrixAtt.Wait();
+
+                        #region used Thread
+                        //Thread setMatrixAttThread = new Thread((matrix) =>
+                        //{
+                        //    var m = matrix as Matrix;
+                        //    m.SetAtt(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
+                        //})
+                        //{
+                        //    CurrentCulture = Globalization.CultureInfo.InvariantCulture,
+                        //    Name = "子线程：设置MCS补偿衰减。",
+                        //    IsBackground = true
+                        //};
+                        //setMatrixAttThread.Start(_matrix);
+                        //setMatrixAttThread.Join();
+
+                        #endregion
 
                         if (Log.log.IsInfoEnabled)
                         {
@@ -310,6 +328,7 @@ namespace System.Matrix
                                 Log.log.InfoFormat("第{0}台Vertex响应。关闭通道{1}{2}，方向{3}。", vertexID, inPortID, outPortID, UpDown.DOWN);
                             }
                         }
+                        #region 上下行
                         //foreach (var signalPath in signalPaths)
                         //{
 
@@ -332,20 +351,32 @@ namespace System.Matrix
                         //vertex.CloseChannel(signalPath.BPortID, signalPath.CPortID, UpDown.DOWN);
                         //Thread.Sleep(10);
                         //}
-                        Thread setMatrixPhaThread = new Thread((matrix) =>
-                        {
-                            var m = matrix as Matrix;
-                            m.SetPha(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
-                        })
-                        {
-                            CurrentCulture = Globalization.CultureInfo.InvariantCulture,
-                            Name = "子线程：设置MCS补偿相位。",
-                            IsBackground = true,
-                        };
+                        #endregion
 
-                        setMatrixPhaThread.Start(_matrix);
+                        Task taskSetMatrixPha = new Task(() =>
+                        {
+                            _matrix.SetPha(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
+                        });
+                        taskSetMatrixPha.Start();
+                        taskSetMatrixPha.Wait();
 
-                        setMatrixPhaThread.Join();
+                        #region used Thread
+                        //Thread setMatrixPhaThread = new Thread((matrix) =>
+                        //{
+                        //    var m = matrix as Matrix;
+                        //    m.SetPha(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true);
+                        //})
+                        //{
+                        //    CurrentCulture = Globalization.CultureInfo.InvariantCulture,
+                        //    Name = "子线程：设置MCS补偿相位。",
+                        //    IsBackground = true,
+                        //};
+
+                        //setMatrixPhaThread.Start(_matrix);
+
+                        //setMatrixPhaThread.Join();
+
+                        #endregion
 
                         if (Log.log.IsInfoEnabled)
                         {
@@ -354,12 +385,24 @@ namespace System.Matrix
                     }
                 }
                 OutputResult(Device.CALIBRATE_OFFSET_DATA_PATH);
-                Log.log.Info("MCS Calibrate Successfully! Please Start Vertex Self Calibrate!");
+                Log.log.Info("MCS calibrate successfully! Please start Vertex self calibrate!");
             }
             catch (Exception ex)
             {
                 Log.log.ErrorFormat("{0}", ex);
                 throw ex;
+            }
+        }
+
+        private void TasksEnded(Task[] tasks)
+        {
+            if (tasks[0].IsCompleted)
+            {
+                Log.log.Info("Get calbox data successfully.");
+            }
+            if (tasks[1].IsCompleted)
+            {
+                Log.log.Info("Reset Matrix's Attenuation and Phase successfully.");
             }
         }
 

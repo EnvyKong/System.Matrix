@@ -65,6 +65,7 @@
       <HintPath>..\packages\log4net.2.0.8\lib\net40-full\log4net.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.SQLite, Version=1.0.106.0, Culture=neutral, PublicKeyToken=db937bc2d44ff139, processorArchitecture=MSIL">
       <HintPath>..\packages\System.Data.SQLite.Core.1.0.106.0\lib\net40\System.Data.SQLite.dll</HintPath>
@@ -87,6 +88,7 @@
     <Compile Include="Device.cs" />
     <Compile Include="DeviceAdapter.cs" />
     <Compile Include="Devices.cs" />
+    <Compile Include="EntryFromAppSettings.cs" />
     <Compile Include="IConnected.cs" />
     <Compile Include="IDeviceMember.cs" />
     <Compile Include="IMatrixSystem.cs" />
@@ -104,6 +106,7 @@
     <Compile Include="MVExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SwitchAdapter.cs" />
+    <Compile Include="ThreadHelper.cs" />
     <Compile Include="VNA.cs" />
     <Compile Include="VNAE5061B.cs" />
     <Compile Include="VNAFactory.cs" />

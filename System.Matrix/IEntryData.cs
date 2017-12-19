@@ -9,17 +9,19 @@ namespace System.Matrix
         List<string> IPToVertex { get; }
         List<string> IPToCalBoxToMatrix { get; }
         List<string> IPToCalBoxToVertex { get; }
+        List<string> IPToCalBoxWhole { get; }
 
         int PortNumToMatrix { get; }
         int PortNumToVNA { get; }
         int PortNumToVertex { get; }
         int PortNumToCalBoxToMatrix { get; }
         int PortNumToCalBoxToVertex { get; }
+        int PortNumToCalBoxWhole { get; }
 
         long Frequency { get; }
         double AttenuationStep { get; }
         double PhaseStep { get; }
-        PhaseStepShiftDirection PhaseStepShiftDirection { get; }
+        PhaseStepShiftDirection PhaseStepShiftDirection { get; set; }
 
         int CalBoxToVertexBConnectNum { get; }
         int CalBoxToVertexAConnectNum { get; }
@@ -36,7 +38,7 @@ namespace System.Matrix
         int CalBoxWholeBNum { get; }
         int CalBoxWholeANum { get; }
 
-        VNAType VNAType { get; }
+        VNAType VNAType { get; set; }
 
         int VertexBConnectNum { get; }
         int VertexAConnectNum { get; }

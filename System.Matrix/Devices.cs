@@ -462,7 +462,7 @@ namespace System.Matrix
             throw new NotImplementedException();
         }
 
-        public virtual CalBoxData GetCalBoxData()
+        public virtual void GetCalBoxData()
         {
             throw new NotImplementedException();
         }
@@ -508,7 +508,7 @@ namespace System.Matrix
             Set64B16Switch(aPort, bPort, 1, 1);
         }
 
-        public override CalBoxData GetCalBoxData()
+        public override void GetCalBoxData()
         {
             string result = GetCalBoxDataCmd((int)EntryData.Frequency * 1000);
             result.Replace("\r\n", "");
@@ -554,7 +554,7 @@ namespace System.Matrix
                     }
                 }
             }
-            return CalBoxData;
+            //return CalBoxData;
         }
 
         private void Set64B16Switch(int portanum, int portbnum, int switchD, int switchB)
@@ -762,13 +762,19 @@ namespace System.Matrix
             SetSwitch(aPort);
         }
 
-        public override CalBoxData GetCalBoxData()
+        public override void GetCalBoxData()
         {
             string result = GetCalBoxDataCmd((int)EntryData.Frequency * 1000);
             result.Replace("\r\n", "");
             string[] calBoxVal = result.Split(':')[2].Split(';');
 
-            return CalBoxData;
+            CalBoxData.APortDataList.Add(new PortData
+            {
+                Attenuation = -1,
+                Phase = -1
+            });
+
+            //return CalBoxData;
         }
 
         public void Set64B16Switch(int a, int b)
@@ -795,13 +801,19 @@ namespace System.Matrix
             SetSwitch(bPort);
         }
 
-        public override CalBoxData GetCalBoxData()
+        public override void GetCalBoxData()
         {
             string result = GetCalBoxDataCmd((int)EntryData.Frequency * 1000);
             result.Replace("\r\n", "");
             string[] calBoxVal = result.Split(':')[2].Split(';');
 
-            return CalBoxData;
+            CalBoxData.BPortDataList.Add(new PortData
+            {
+                Attenuation = -2,
+                Phase = -2
+            });
+
+            //return CalBoxData;
         }
     }
 }

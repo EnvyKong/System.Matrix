@@ -6,6 +6,6 @@
         bool Connected { get; }
         CalBoxData CalBoxData { get; set; }
 
-        CalBoxData GetCalBoxData();
+        void GetCalBoxData();
     }
 }

@@ -15,7 +15,7 @@
 
         public bool Connected => throw new NotImplementedException();
 
-        public CalBoxData CalBoxData { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
+        public CalBoxData CalBoxData { get; set; }
 
         public void DoSwitch(int aPort, int bPort)
         {
@@ -34,20 +34,21 @@
             }
         }
 
-        public CalBoxData GetCalBoxData()
+        public void GetCalBoxData()
         {
+            CalBoxData = new CalBoxData();
             if (_calBoxToMatrix.Connected & _calBoxToVertex.Connected)
             {
                 _calBoxToMatrix.GetCalBoxData();
                 _calBoxToVertex.GetCalBoxData();
 
-                return CalBoxData;
+                //return CalBoxData;
             }
             else if (_calBoxWhole.Connected)
             {
-                CalBoxData = _calBoxWhole.GetCalBoxData();
+                //CalBoxData = _calBoxWhole.GetCalBoxData();
 
-                return CalBoxData;
+                //return CalBoxData;
             }
             else
             {
