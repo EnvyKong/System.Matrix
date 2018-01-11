@@ -1,7 +1,7 @@
 ﻿namespace System.Matrix
 {
-    public interface IGetEntryData
-    {
-        IEntryData GetEntryData();
-    }
+    //public interface IGetEntryData
+    //{
+    //    IEntryData GetEntryData();
+    //}
 }

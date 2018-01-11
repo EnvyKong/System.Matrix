@@ -59,13 +59,13 @@ namespace System.Matrix
         /// 获取仪表支持的最小的频点,单位转换为MHz
         /// </summary>
         /// <returns>单位为MHz</returns>
-        double GetFREQMIN();
+        double GetFreqMin();
 
         /// <summary>
         /// 获取仪表支持的最大的频点,单位转换为MHz
         /// </summary>
         /// <returns>单位为MHz</returns>
-        double GetFREQMAX();
+        double GetFreqMax();
 
         /// <summary>
         /// 加载文件

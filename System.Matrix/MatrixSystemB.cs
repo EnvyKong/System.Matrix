@@ -9,14 +9,15 @@ namespace System.Matrix
 {
     public class MatrixSystemB : IMatrixSystem, ICalibrate
     {
-        public MatrixSystemB(IEntryData data)
+        public MatrixSystemB(DeviceData data)
         {
             _data = data;
         }
 
-        private IEntryData _data;
+        private DeviceData _data;
         private Matrix _matrix;
-        private Vertex _vertex;
+        private Vertex _vertex1;
+        private Vertex _vertex2;
         private List<Vertex> _vertexs;
         private CalBoxToMatrix _calBoxToMatrix;
         private CalBoxToVertex _calBoxToVertex;
@@ -55,12 +56,14 @@ namespace System.Matrix
             try
             {
                 _matrix = new Matrix(_data);
-                _vertex = new Vertex(_data);
-                _vertexs = new List<Vertex>();
-                for (int i = 1; i <= _vertex.IP.Count; i++)
-                {
-                    _vertexs.Add(new Vertex(_data));
-                }
+                _vertex1 = new Vertex(_data);
+                _vertex2 = new Vertex(_data);
+                _vertexs.Add(_vertex1);
+                _vertexs.Add(_vertex2);
+                //for (int i = 1; i <= _vertex.IP.Count; i++)
+                //{
+                //    _vertexs.Add(new Vertex(_data));
+                //}
                 _calBoxToMatrix = new CalBoxToMatrix(_data);
                 _calBoxToVertex = new CalBoxToVertex(_data);
                 _calBoxWhole = new CalBoxWhole(_data);
@@ -541,7 +544,7 @@ namespace System.Matrix
                 Scene scene = new Scene();
                 scene.LoadSceneData(path, _matrix);
 
-                FtpClient ftpClient = new FtpClient(_matrix.IP[0], "root", "123456");
+                FtpClient ftpClient = new FtpClient(_matrix.IP, "root", "123456");
                 var dbFileName = $"ASP{_matrix.APortNum}B{_matrix.BPortNum}.db";
                 var ftpPath = $"ftp://{_matrix.IP}/media/mmcblk0p1/{dbFileName}";
 

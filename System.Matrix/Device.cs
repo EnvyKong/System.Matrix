@@ -8,7 +8,8 @@ namespace System.Matrix
 {
     public abstract class Device : TcpClient, ICalibratable
     {
-        public IEntryData EntryData { get; }
+        //public IEntryData EntryData { get; }
+        protected DeviceData _deviceData;
 
         public const string CALIBRATE_OFFSET_DATA_PATH = "calibrate.txt";
 
@@ -16,15 +17,22 @@ namespace System.Matrix
 
         public string BaseName { get => GetType().BaseType.Name; }
 
-        public int APortNum { get => (int)EntryData.GetPropertyValue($"{Name}ANum"); }
+        //public int APortNum { get => (int)EntryData.GetPropertyValue($"{Name}ANum"); }
 
-        public int BPortNum { get => (int)EntryData.GetPropertyValue($"{Name}BNum"); }
+        //public int BPortNum { get => (int)EntryData.GetPropertyValue($"{Name}BNum"); }
 
-        public int APortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}AConnectNum"); }
+        //public int APortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}AConnectNum"); }
 
-        public int BPortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}BConnectNum"); }
+        //public int BPortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}BConnectNum"); }
 
-        public long Frequency { get => (long)EntryData.GetPropertyValue("Frequency"); }
+        public int APortNum { get => _deviceData.APortNum; }
+        public int BPortNum { get => _deviceData.BPortNum; }
+        public int APortConnectNum { get => _deviceData.APortConnectNum; }
+        public int BPortConnectNum { get => _deviceData.BPortConnectNum; }
+
+        public long Frequency { get => _deviceData.Frequency; }
+
+        //public long Frequency { get => (long)EntryData.GetPropertyValue("Frequency"); }
 
         public int this[int aPortID, int bPortID]
         {
@@ -48,85 +56,56 @@ namespace System.Matrix
 
         public virtual string Cmd { get; set; }
 
-        protected Device(IEntryData data)
+        //protected Device(IEntryData data)
+        //{
+        //    EntryData = data;
+        //}
+
+        protected Device(DeviceData data)
         {
-            EntryData = data;
+            _deviceData = data;
         }
 
-        //private string _ip;
-        public virtual List<string> IP
+        //public virtual string IP
+        //{
+        //    get
+        //    {
+        //        return EntryData.GetPropertyValue($"IPTo{Name}").ToString();
+        //    }
+        //}
+
+        public virtual string IP
         {
             get
             {
-                return (List<string>)EntryData.GetPropertyValue($"IPTo{Name}");
+                return _deviceData.IP;
             }
-            //private set
-            //{
-            //    if (IPAddress.TryParse(value, out IPAddress address))
-            //    {
-            //        IPAddress = address;
-            //        _ip = address.ToString();
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show($"{Name} IP Formal Error!");
-            //        Log.log.ErrorFormat("{0} IP Formal Error!", Name);
-            //    }
-            //    Ping ping = new Ping();
-            //    var pingReply = ping.Send(address);
-            //    if (pingReply.Status != IPStatus.Success)
-            //    {
-            //        MessageBox.Show($"{Name} IP Ping Error!");
-            //        Log.log.ErrorFormat("{0} IP Ping Error!", Name);
-            //    }
-            //}
         }
 
-        public string VNAIP
+        //public string VNAIP
+        //{
+        //    get
+        //    {
+        //        return (string)_deviceData.GetPropertyValue("VNAIP");
+        //    }
+        //}
+
+        public IPAddress IPAddress
         {
             get
             {
-                return (string)EntryData.GetPropertyValue($"IPTo{BaseName}");
-            }
-            //private set
-            //{
-            //    if (IPAddress.TryParse(value, out IPAddress address))
-            //    {
-            //        IPAddress = address;
-            //        _ip = address.ToString();
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show($"{Name} IP Formal Error!");
-            //        Log.log.ErrorFormat("{0} IP Formal Error!", Name);
-            //    }
-            //    Ping ping = new Ping();
-            //    var pingReply = ping.Send(address);
-            //    if (pingReply.Status != IPStatus.Success)
-            //    {
-            //        MessageBox.Show($"{Name} IP Ping Error!");
-            //        Log.log.ErrorFormat("{0} IP Ping Error!", Name);
-            //    }
-            //}
-        }
-
-        public List<IPAddress> IPAddress
-        {
-            get
-            {
-                return IP.Select(i => Net.IPAddress.Parse(i)).ToList();
+                return IPAddress.Parse(IP);
             }
             private set { }
         }
 
-        public int PortNum { get => (int)EntryData.GetPropertyValue($"PortNumTo{Name}"); }
+        //public int PortNum { get => (int)EntryData.GetPropertyValue($"PortNumTo{Name}"); }
+
+        public int PortNum { get => _deviceData.PortNum; }
 
         public virtual void Connect()
         {
-            foreach (var ip in IPAddress)
-            {
-                Connect(ip, PortNum);
-            }
+            Connect(IPAddress, PortNum);
         }
 
         public string Send(string cmd)

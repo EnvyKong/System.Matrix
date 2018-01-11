@@ -13,8 +13,8 @@ namespace System.Matrix
         int BPortConnectNum { get; }
         int SignalPathCount { get; }
         string Cmd { get; set; }
-        List<string> IP { get; }
-        List<IPAddress> IPAddress { get; }
+        string IP { get; }
+        IPAddress IPAddress { get; }
         int PortNum { get; }
     }
 }

@@ -12,7 +12,7 @@ namespace System.Matrix
         ////定义读取的长度
         //private int intReadLength;
 
-        public VNAE5061B(IEntryData data) : base(data)
+        public VNAE5061B(DeviceData data) : base(data)
         {
 
         }
@@ -31,9 +31,13 @@ namespace System.Matrix
 
         public override bool Connected { get; set; }
 
-        public int PhaMarkPoint => (int)EntryData.GetPropertyValue("PhaMarkPoint");
+        //public int PhaMarkPoint => (int)EntryData.GetPropertyValue("PhaMarkPoint");
 
-        public int AttMarkPoint => (int)EntryData.GetPropertyValue("AttMarkPoint");
+        //public int AttMarkPoint => (int)EntryData.GetPropertyValue("AttMarkPoint");
+
+        public int PhaMarkPoint => _deviceData.PhaMarkPoint;
+
+        public int AttMarkPoint => _deviceData.AttMarkPoint;
 
         /// <summary>
         /// 连接仪表
@@ -46,7 +50,7 @@ namespace System.Matrix
                 #region Socket 连接方式
                 messageBased = new FormattedIO488();
                 ResourceManager grm = new ResourceManager();
-                messageBased.IO = (IMessage)grm.Open("TCPIP0::" + VNAIP + "::5025::SOCKET", AccessMode.NO_LOCK, 2000, "");
+                messageBased.IO = (IMessage)grm.Open("TCPIP0::" + IP + "::5025::SOCKET", AccessMode.NO_LOCK, 2000, "");
                 messageBased.IO.Timeout = 200000;
                 messageBased.IO.SendEndEnabled = !messageBased.IO.SendEndEnabled;
                 messageBased.IO.TerminationCharacterEnabled = !messageBased.IO.TerminationCharacterEnabled;
@@ -672,7 +676,7 @@ namespace System.Matrix
         /// 获取仪表支持的最小的频点,单位转换为MHz
         /// </summary>
         /// <returns>单位为MHz</returns>
-        public double GetFREQMIN()
+        public double GetFreqMin()
         {
             string strRe = "";
             string strCmd = "";
@@ -700,7 +704,7 @@ namespace System.Matrix
         /// 获取仪表支持的最大的频点,单位转换为MHz
         /// </summary>
         /// <returns>单位为MHz</returns>
-        public double GetFREQMAX()
+        public double GetFreqMax()
         {
             string strRe = "";
             string strCmd = "";

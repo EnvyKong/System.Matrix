@@ -64,6 +64,9 @@
     <Reference Include="log4net, Version=2.0.8.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
       <HintPath>..\packages\log4net.2.0.8\lib\net40-full\log4net.dll</HintPath>
     </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.4.12\lib\net40\NLog.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.configuration" />
     <Reference Include="System.Core" />
@@ -90,6 +93,7 @@
     <Compile Include="Devices.cs" />
     <Compile Include="EntryFromAppSettings.cs" />
     <Compile Include="IConnected.cs" />
+    <Compile Include="DeviceData.cs" />
     <Compile Include="IDeviceMember.cs" />
     <Compile Include="IMatrixSystem.cs" />
     <Compile Include="IGetEntryData.cs" />

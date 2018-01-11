@@ -7,17 +7,18 @@ namespace System.Matrix
 {
     public class MatrixSystemT : IMatrixSystem, ICalibrate, IDeviceMember
     {
-        public MatrixSystemT(IEntryData data)
+        public MatrixSystemT(List<DeviceData> data)
         {
-            EntryData = data;
+            DeviceData = data;
         }
 
-        public IEntryData EntryData { get; }
+        public List<DeviceData> DeviceData { get; }
 
         public IVectorNetworkAnalyzer VNA { get; set; }
         public Matrix Matrix { get; set; }
-        public Vertex Vertex { get; set; }
-        public List<Vertex> Vertexs { get; set; }
+        public Vertex Vertex1 { get; set; }
+        public Vertex Vertex2 { get; set; }
+        public List<Vertex> VertexList { get; set; }
         public CalBoxToMatrix CalBoxToMatrix { get; set; }
         public CalBoxToVertex CalBoxToVertex { get; set; }
         public CalBoxWhole CalBoxWhole { get; set; }
@@ -79,7 +80,7 @@ namespace System.Matrix
                         _signalPaths = GetAllSignalPathData();
                         if (Log.log.IsInfoEnabled)
                         {
-                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", _signalPaths.Count, Vertexs.Count);
+                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", _signalPaths.Count, VertexList.Count);
                         }
 
                         //找到衰减最小值
@@ -116,11 +117,11 @@ namespace System.Matrix
                         for (int b = 1; b <= Matrix.BPortConnectNum; b++)
                         {
                             //下行
-                            var vertexID = (b - 1) / Vertexs[0].APortConnectNum;
-                            var inPortID = (b - 1) % Vertexs[0].APortConnectNum + 1;
+                            var vertexID = (b - 1) / VertexList[0].APortConnectNum;
+                            var inPortID = (b - 1) % VertexList[0].APortConnectNum + 1;
                             var outPortID = 1;
 
-                            (Vertexs[vertexID] as Vertex).OpenChannel(inPortID, outPortID, UpDown.DOWN);
+                            (VertexList[vertexID] as Vertex).OpenChannel(inPortID, outPortID, UpDown.DOWN);
 
                             if (Log.log.IsInfoEnabled)
                             {
@@ -130,7 +131,7 @@ namespace System.Matrix
                             for (int a = 1 + (b - 1) * (Matrix.APortNum / Matrix.BPortNum); a <= 2 * (b - 1) * (Matrix.APortNum / Matrix.BPortNum); a++)
                             {
                                 var calBoxAPortID = a;
-                                var calBoxBPortID = ((b - 1) / Vertexs[0].APortConnectNum) * Vertexs[0].BPortConnectNum + 1;
+                                var calBoxBPortID = ((b - 1) / VertexList[0].APortConnectNum) * VertexList[0].BPortConnectNum + 1;
                                 //(CalBoxToMatrix as CalBoxToMatrix).Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
                                 //Switch.DoSwitch(calBoxAPortID, calBoxBPortID);
                                 SwitchAdapter.DoSwitch(calBoxAPortID, calBoxBPortID);
@@ -140,7 +141,7 @@ namespace System.Matrix
                                 }
                                 _signalPaths.Find(s => s.Index.Equals($"{a}:{b}:1")).Phase = VNA.GetMarkerY(VNA.PhaMarkPoint);
                             }
-                            (Vertexs[vertexID] as Vertex).CloseChannel(inPortID, outPortID, UpDown.DOWN);
+                            (VertexList[vertexID] as Vertex).CloseChannel(inPortID, outPortID, UpDown.DOWN);
 
                             if (Log.log.IsInfoEnabled)
                             {
@@ -206,18 +207,18 @@ namespace System.Matrix
             VNA.SetMarkerActive();
             VNA.SetMarkerX((Matrix as Matrix).Frequency * 1000000);
             //关闭Vertex所有通道，后面用哪个打开哪个
-            foreach (var v in Vertexs)
+            foreach (var v in VertexList)
             {
                 (v as Vertex).CloseAllChannel(v.APortNum, v.BPortNum);
             }
             for (int b = 1; b <= Matrix.BPortConnectNum; b++)
             {
                 //下行
-                var vertexID = (b - 1) / Vertexs[0].APortConnectNum;
-                var inPortID = (b - 1) % Vertexs[0].APortConnectNum + 1;
+                var vertexID = (b - 1) / VertexList[0].APortConnectNum;
+                var inPortID = (b - 1) % VertexList[0].APortConnectNum + 1;
                 var outPortID = 1;
 
-                (Vertexs[vertexID] as Vertex).OpenChannel(inPortID, outPortID, UpDown.DOWN);
+                (VertexList[vertexID] as Vertex).OpenChannel(inPortID, outPortID, UpDown.DOWN);
 
                 if (Log.log.IsInfoEnabled)
                 {
@@ -227,7 +228,7 @@ namespace System.Matrix
                 for (int a = 1 + (b - 1) * (Matrix.APortNum / Matrix.BPortNum); a <= b * (Matrix.APortNum / Matrix.BPortNum); a++)
                 {
                     var calBoxAPortID = a;
-                    var calBoxBPortID = ((b - 1) / Vertexs[0].APortConnectNum) * Vertexs[0].BPortConnectNum + 1;
+                    var calBoxBPortID = ((b - 1) / VertexList[0].APortConnectNum) * VertexList[0].BPortConnectNum + 1;
 
                     //(CalBoxToMatrix as CalBoxToMatrix).Set64B16Switch(calBoxAPortID, calBoxBPortID, 1, 1);
                     //Switch.DoSwitch(calBoxAPortID, calBoxBPortID);
@@ -238,7 +239,7 @@ namespace System.Matrix
                     }
                     //(CalBoxToMatrix as CalBoxToMatrix).SetSwitch(a);
                     //calBoxToVertex .SetSwitch(c);
-                    var signalPath = new SignalPath(SwitchAdapter.CalBoxData, EntryData)
+                    var signalPath = new SignalPath(SwitchAdapter.CalBoxData, DeviceData.Find(d => d.Name.ToLower().Contains("matrix")))
                     {
                         APortID = a,
                         BPortID = b,
@@ -247,7 +248,7 @@ namespace System.Matrix
                     };
                     signalPaths.Add(signalPath);
                 }
-                (Vertexs[vertexID] as Vertex).CloseChannel(inPortID, outPortID, UpDown.DOWN);
+                (VertexList[vertexID] as Vertex).CloseChannel(inPortID, outPortID, UpDown.DOWN);
 
                 if (Log.log.IsInfoEnabled)
                 {
@@ -266,22 +267,28 @@ namespace System.Matrix
         {
             try
             {
-                Matrix = new Matrix(EntryData);
-                Vertex = new Vertex(EntryData);
-                Vertexs = new List<Vertex>();
-                for (int i = 0; i < Vertex.IP.Count; i++)
-                {
-                    Vertexs.Add(new Vertex(EntryData));
-                }
-                CalBoxToMatrix = new CalBoxToMatrix(EntryData);
-                CalBoxToVertex = new CalBoxToVertex(EntryData);
-                CalBoxWhole = new CalBoxWhole(EntryData);
-                VNA = VNAFactory.GetVNA(EntryData);
+                Matrix = new Matrix(DeviceData.Find(d => d.Name.ToLower().Contains("matrix")));
+                Vertex1 = new Vertex(DeviceData.Find(d => d.Name.ToLower().Contains("vertex1")));
+                Vertex2 = new Vertex(DeviceData.Find(d => d.Name.ToLower().Contains("vertex2")));
+                VertexList = new List<Vertex>();
+                VertexList.Add(Vertex1);
+                VertexList.Add(Vertex2);
+                //for (int i = 0; i < Vertex.IP.Count; i++)
+                //{
+                //    VertexList.Add(new Vertex(EntryData));
+                //}
+                CalBoxToMatrix = new CalBoxToMatrix(DeviceData.Find(d => d.Name.ToLower().Contains("calboxtomatrix")));
+                CalBoxToVertex = new CalBoxToVertex(DeviceData.Find(d => d.Name.ToLower().Contains("calboxtovertex")));
+                CalBoxWhole = new CalBoxWhole(DeviceData.Find(d => d.Name.ToLower().Contains("calboxwhole")));
+                VNA = VNAFactory.GetVNA(DeviceData.Find(d => d.Name.ToLower().Contains("vna")));
 
                 Matrix.Connect();
-                Vertexs.ForEach(v => v.Connect());
-                CalBoxToMatrix.Connect();
-                CalBoxToVertex.Connect();
+                //Vertexs.ForEach(v => v.Connect());
+                VertexList[0].Connect();
+                VertexList[1].Connect();
+
+                //CalBoxToMatrix.Connect();
+                //CalBoxToVertex.Connect();
                 CalBoxWhole.Connect();
                 VNA.Connect();
             }
@@ -297,7 +304,7 @@ namespace System.Matrix
             try
             {
                 Matrix.Close();
-                Vertexs.ForEach(v => v.Close());
+                VertexList.ForEach(v => v.Close());
                 CalBoxToMatrix.Close();
                 CalBoxToVertex.Close();
                 CalBoxWhole.Close();

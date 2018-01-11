@@ -5,16 +5,20 @@ namespace System.Matrix
 {
     class VNARSZVB8 : VNA, IVectorNetworkAnalyzer
     {
-        public VNARSZVB8(IEntryData data) : base(data)
+        public VNARSZVB8(DeviceData data) : base(data)
         {
 
         }
 
         public override bool Connected { get; set; }
 
-        public int PhaMarkPoint => (int)EntryData.GetPropertyValue("PhaMarkPoint");
+        //public int PhaMarkPoint => (int)EntryData.GetPropertyValue("PhaMarkPoint");
 
-        public int AttMarkPoint => (int)EntryData.GetPropertyValue("AttMarkPoint");
+        //public int AttMarkPoint => (int)EntryData.GetPropertyValue("AttMarkPoint");
+
+        public int PhaMarkPoint => _deviceData.PhaMarkPoint;
+
+        public int AttMarkPoint => _deviceData.AttMarkPoint;
 
         public override void Connect()
         {
@@ -22,7 +26,7 @@ namespace System.Matrix
             {
                 messageBased = new FormattedIO488();
                 ResourceManager grm = new ResourceManager();//TCPIP0::192.168.8.219::inst0::INSTR
-                messageBased.IO = (IMessage)grm.Open("TCPIP0::" + VNAIP + "::inst0::INSTR", AccessMode.NO_LOCK, 2000, "");
+                messageBased.IO = (IMessage)grm.Open("TCPIP0::" + IP + "::inst0::INSTR", AccessMode.NO_LOCK, 2000, "");
                 messageBased.IO.Timeout = 200000;
                 messageBased.IO.SendEndEnabled = !messageBased.IO.SendEndEnabled;
                 messageBased.IO.TerminationCharacterEnabled = !messageBased.IO.TerminationCharacterEnabled;
@@ -48,12 +52,12 @@ namespace System.Matrix
             throw new NotImplementedException();
         }
 
-        public double GetFREQMAX()
+        public double GetFreqMax()
         {
             throw new NotImplementedException();
         }
 
-        public double GetFREQMIN()
+        public double GetFreqMin()
         {
             throw new NotImplementedException();
         }
