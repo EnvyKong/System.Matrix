@@ -1,7 +1,7 @@
 ﻿
 namespace System.Matrix
 {
-    public interface IVectorNetworkAnalyzer : IConnected
+    public interface IVectorNetworkAnalyzer
     {
         /// <summary>
         /// 读取IDN
@@ -139,5 +139,10 @@ namespace System.Matrix
 
         int PhaMarkPoint { get; }
         int AttMarkPoint { get; }
+
+        bool Connected { get; set; }
+        string Name { get; }
+        void Close();
+        void Connect();
     }
 }

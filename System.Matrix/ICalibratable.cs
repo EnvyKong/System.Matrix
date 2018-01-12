@@ -1,12 +1,10 @@
-﻿using System.Collections.Generic;
-using System.Net;
+﻿using System.Net;
 
 namespace System.Matrix
 {
     public interface ICalibratable : IConnected
     {
         int this[int a, int b] { get; }
-        //int Quantity { get; }
         int APortNum { get; }
         int BPortNum { get; }
         int APortConnectNum { get; }

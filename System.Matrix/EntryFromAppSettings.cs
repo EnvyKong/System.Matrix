@@ -3,7 +3,7 @@ using System.Configuration;
 
 namespace System.Matrix
 {
-    public class EntryFromAppSettings //: IEntryData
+    public class EntryFromAppSettings
     {
         public virtual List<string> IPToMatrix => new List<string> { ConfigurationManager.AppSettings["IPToMatrix"].ToStringOrDefault() };
         public virtual string IPToVNA => ConfigurationManager.AppSettings["IPToVNA"].ToStringOrDefault();

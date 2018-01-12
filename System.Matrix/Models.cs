@@ -180,7 +180,8 @@ namespace System.Matrix
     public enum PhaseStepShiftDirection
     {
         Clockwise,
-        Anticlockwise
+        Anticlockwise,
+        Default
     }
 
     public class SignalPath
@@ -274,6 +275,7 @@ namespace System.Matrix
 
     public enum VNAType
     {
+        Default,
         Kesight_E5072A,
         Kesight_E5071C,
         Kesight_E5070B,

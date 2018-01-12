@@ -2,7 +2,7 @@
 
 namespace System.Matrix
 {
-    class DeviceAdapter : IDeviceMember
+    class DeviceAdapter
     {
         public DeviceData DeviceData => throw new NotImplementedException();
 

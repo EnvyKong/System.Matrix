@@ -35,9 +35,9 @@ namespace System.Matrix
 
         //public int AttMarkPoint => (int)EntryData.GetPropertyValue("AttMarkPoint");
 
-        public int PhaMarkPoint => _deviceData.PhaMarkPoint;
+        public int PhaMarkPoint => DeviceData.PhaMarkPoint;
 
-        public int AttMarkPoint => _deviceData.AttMarkPoint;
+        public int AttMarkPoint => DeviceData.AttMarkPoint;
 
         /// <summary>
         /// 连接仪表
@@ -68,7 +68,7 @@ namespace System.Matrix
             {
                 Connected = false;
                 Close();
-                System.Windows.Forms.MessageBox.Show(ex.ToString());
+                Windows.Forms.MessageBox.Show(ex.ToString());
             }
         }
 
@@ -1007,7 +1007,7 @@ namespace System.Matrix
             }
             catch (Exception ex)
             {
-                System.Windows.Forms.MessageBox.Show(ex.ToString());
+                Windows.Forms.MessageBox.Show(ex.ToString());
                 //MessageBox.Show("VNA disconnected.Please open again.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 //douRe = null;
             }
@@ -1096,7 +1096,7 @@ namespace System.Matrix
             catch (Exception ex)
             {
                 //MessageBox.Show("VNA disconnected.Please open again.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                System.Windows.Forms.MessageBox.Show(ex.ToString());
+                Windows.Forms.MessageBox.Show(ex.ToString());
                 strRe = null;
             }
             return strRe;

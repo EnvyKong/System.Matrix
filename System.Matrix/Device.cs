@@ -1,15 +1,12 @@
 ﻿using System.Net.Sockets;
 using System.Net;
 using System.Text;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace System.Matrix
 {
-    public abstract class Device : TcpClient, ICalibratable
+    public abstract class Device : TcpClient
     {
-        //public IEntryData EntryData { get; }
-        protected DeviceData _deviceData;
+        public DeviceData DeviceData { get; }
 
         public const string CALIBRATE_OFFSET_DATA_PATH = "calibrate.txt";
 
@@ -17,22 +14,15 @@ namespace System.Matrix
 
         public string BaseName { get => GetType().BaseType.Name; }
 
-        //public int APortNum { get => (int)EntryData.GetPropertyValue($"{Name}ANum"); }
+        public int APortNum { get => DeviceData.APortNum; }
 
-        //public int BPortNum { get => (int)EntryData.GetPropertyValue($"{Name}BNum"); }
+        public int BPortNum { get => DeviceData.BPortNum; }
 
-        //public int APortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}AConnectNum"); }
+        public int APortConnectNum { get => DeviceData.APortConnectNum; }
 
-        //public int BPortConnectNum { get => (int)EntryData.GetPropertyValue($"{Name}BConnectNum"); }
+        public int BPortConnectNum { get => DeviceData.BPortConnectNum; }
 
-        public int APortNum { get => _deviceData.APortNum; }
-        public int BPortNum { get => _deviceData.BPortNum; }
-        public int APortConnectNum { get => _deviceData.APortConnectNum; }
-        public int BPortConnectNum { get => _deviceData.BPortConnectNum; }
-
-        public long Frequency { get => _deviceData.Frequency; }
-
-        //public long Frequency { get => (long)EntryData.GetPropertyValue("Frequency"); }
+        public long Frequency { get => DeviceData.Frequency; }
 
         public int this[int aPortID, int bPortID]
         {
@@ -56,39 +46,18 @@ namespace System.Matrix
 
         public virtual string Cmd { get; set; }
 
-        //protected Device(IEntryData data)
-        //{
-        //    EntryData = data;
-        //}
-
-        protected Device(DeviceData data)
+        protected Device(DeviceData deviceData)
         {
-            _deviceData = data;
+            DeviceData = deviceData;
         }
-
-        //public virtual string IP
-        //{
-        //    get
-        //    {
-        //        return EntryData.GetPropertyValue($"IPTo{Name}").ToString();
-        //    }
-        //}
 
         public virtual string IP
         {
             get
             {
-                return _deviceData.IP;
+                return DeviceData.IP;
             }
         }
-
-        //public string VNAIP
-        //{
-        //    get
-        //    {
-        //        return (string)_deviceData.GetPropertyValue("VNAIP");
-        //    }
-        //}
 
         public IPAddress IPAddress
         {
@@ -99,13 +68,17 @@ namespace System.Matrix
             private set { }
         }
 
-        //public int PortNum { get => (int)EntryData.GetPropertyValue($"PortNumTo{Name}"); }
-
-        public int PortNum { get => _deviceData.PortNum; }
+        public int PortNum { get => DeviceData.PortNum; }
 
         public virtual void Connect()
         {
-            Connect(IPAddress, PortNum);
+            try
+            {
+                Connect(IPAddress, PortNum);
+            }
+            catch (Exception)
+            {
+            }
         }
 
         public string Send(string cmd)
