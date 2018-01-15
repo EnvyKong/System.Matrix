@@ -16,9 +16,9 @@ namespace System.Matrix
 
         //public int AttMarkPoint => (int)EntryData.GetPropertyValue("AttMarkPoint");
 
-        public int PhaMarkPoint => DeviceData.PhaMarkPoint;
+        public int PhaMarkPoint => _deviceData.PhaMarkPoint;
 
-        public int AttMarkPoint => DeviceData.AttMarkPoint;
+        public int AttMarkPoint => _deviceData.AttMarkPoint;
 
         public override void Connect()
         {

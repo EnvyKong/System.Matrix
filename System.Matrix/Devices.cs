@@ -38,10 +38,11 @@ namespace System.Matrix
         //public int AttCalFre { get => (int)EntryData.GetPropertyValue("AttCalFre"); }
         //public int PhaCalFre { get => (int)EntryData.GetPropertyValue("PhaCalFre"); }
 
-        public double AttenuationStep { get => DeviceData.AttenuationStep; }
-        public double PhaseStep { get => DeviceData.PhaseStep; }
-        public int AttCalFre { get => DeviceData.AttCalFre; }
-        public int PhaCalFre { get => DeviceData.PhaCalFre; }
+        public double AttenuationStep { get => _deviceData.AttenuationStep; }
+        public double PhaseStep { get => _deviceData.PhaseStep; }
+        public int AttCalFre { get => _deviceData.AttCalFre; }
+        public int PhaCalFre { get => _deviceData.PhaCalFre; }
+        public PhaseStepShiftDirection PhaseStepShiftDirection { get => _deviceData.PhaseStepShiftDirection; }
 
         private string SetAttCmd(int id, int value)
         {
@@ -145,8 +146,8 @@ namespace System.Matrix
                     foreach (var channel in channelList)
                     {
                         var currentPha = CurrentPha(this[channel.APortID, channel.BPortID]);
-                        var offset = (int)Math.Round(channel.PhaOffset / DeviceData.PhaseStep);
-                        var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (currentPha + offset) % (int)(360 / DeviceData.PhaseStep));
+                        var offset = (int)Math.Round(channel.PhaOffset / _deviceData.PhaseStep);
+                        var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (currentPha + offset) % (int)(360 / _deviceData.PhaseStep));
                         if ((!x.Contains("OK")))
                         {
                             Log.log.ErrorFormat("Signal Path ID : A{0}B{1} Set Value Error!", channel.APortID, channel.BPortID);
@@ -157,8 +158,8 @@ namespace System.Matrix
                 {
                     foreach (var channel in channelList)
                     {
-                        var offset = (int)Math.Round(channel.PhaOffset / DeviceData.PhaseStep);
-                        var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (channel.PhaStdCode + offset) % (int)(360 / DeviceData.PhaseStep));
+                        var offset = (int)Math.Round(channel.PhaOffset / _deviceData.PhaseStep);
+                        var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (channel.PhaStdCode + offset) % (int)(360 / _deviceData.PhaseStep));
                         if ((!x.Contains("OK")))
                         {
                             Log.log.ErrorFormat("Signal Path ID : A{0}B{1} Set Value Error!", channel.APortID, channel.BPortID);
@@ -204,7 +205,7 @@ namespace System.Matrix
                     foreach (var channel in channelList)
                     {
                         int currentAtt = CurrentAtt(this[channel.APortID, channel.BPortID]);
-                        int offset = (int)(Math.Round(channel.AttOffset / DeviceData.AttenuationStep) % 240);
+                        int offset = (int)(Math.Round(channel.AttOffset / _deviceData.AttenuationStep) % 240);
                         var x = SetAttCmd(this[channel.APortID, channel.BPortID], (currentAtt + offset));
                         if (!x.Contains("OK"))
                         {
@@ -216,7 +217,7 @@ namespace System.Matrix
                 {
                     foreach (var channel in channelList)
                     {
-                        int offset = (int)(Math.Round(channel.AttOffset / DeviceData.AttenuationStep) % 240);
+                        int offset = (int)(Math.Round(channel.AttOffset / _deviceData.AttenuationStep) % 240);
                         var x = SetAttCmd(this[channel.APortID, channel.BPortID], (channel.AttStdCode + offset));
                         if (!x.Contains("OK"))
                         {
@@ -294,6 +295,8 @@ namespace System.Matrix
 
     public class Vertex : Device
     {
+        public static int Count { get; set; }
+
         internal void OpenChannel(int inPortID, int outPortID, UpDown linkUpDown)
         {
             try
@@ -320,7 +323,7 @@ namespace System.Matrix
 
         public Vertex(DeviceData deviceData) : base(deviceData)
         {
-
+            Count++;
         }
 
         internal void CloseChannel(int inPortID, int outPortID, UpDown linkUpDown)
@@ -514,7 +517,7 @@ namespace System.Matrix
 
         public override void GetCalBoxData()
         {
-            string result = GetCalBoxDataCmd((int)DeviceData.Frequency * 1000);
+            string result = GetCalBoxDataCmd((int)_deviceData.Frequency * 1000);
             result.Replace("\r\n", "");
             string[] calBoxVal = result.Split(':')[2].Split(';');
             for (int n = 1; n <= calBoxVal.Length; n++)
@@ -768,7 +771,7 @@ namespace System.Matrix
 
         public override void GetCalBoxData()
         {
-            string result = GetCalBoxDataCmd((int)DeviceData.Frequency * 1000);
+            string result = GetCalBoxDataCmd((int)_deviceData.Frequency * 1000);
             result.Replace("\r\n", "");
             string[] calBoxVal = result.Split(':')[2].Split(';');
 
@@ -807,7 +810,7 @@ namespace System.Matrix
 
         public override void GetCalBoxData()
         {
-            string result = GetCalBoxDataCmd((int)DeviceData.Frequency * 1000);
+            string result = GetCalBoxDataCmd((int)_deviceData.Frequency * 1000);
             result.Replace("\r\n", "");
             string[] calBoxVal = result.Split(':')[2].Split(';');
 

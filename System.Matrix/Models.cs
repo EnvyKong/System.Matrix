@@ -186,14 +186,14 @@ namespace System.Matrix
 
     public class SignalPath
     {
-        public SignalPath(CalBoxData calBoxData, DeviceData deviceData)
+        public SignalPath(CalBoxData calBoxData, PhaseStepShiftDirection phaseStepShiftDirection)
         {
             _calBoxData = calBoxData;
-            _deviceData = deviceData;
+            _phaseStepShiftDirection = phaseStepShiftDirection;
         }
 
-        private CalBoxData _calBoxData;
-        private DeviceData _deviceData;
+        private readonly CalBoxData _calBoxData;
+        private readonly PhaseStepShiftDirection _phaseStepShiftDirection;
 
         public static bool HasAttStandardValue { get; private set; }
         public static bool HasPhaStandardValue { get; private set; }
@@ -261,13 +261,16 @@ namespace System.Matrix
         {
             get
             {
-                if (_deviceData.PhaseStepShiftDirection == PhaseStepShiftDirection.Anticlockwise)
+                switch (_phaseStepShiftDirection)
                 {
-                    return new Channel(APortID, BPortID) { AttOffset = Attenuation - ExpectAttStandard, PhaOffset = Phase - ExpectPhaStandard };
-                }
-                else
-                {
-                    return new Channel(APortID, BPortID) { AttOffset = Attenuation - ExpectAttStandard, PhaOffset = ExpectPhaStandard - Phase };
+                    case PhaseStepShiftDirection.Clockwise:
+                        return new Channel(APortID, BPortID) { AttOffset = Attenuation - ExpectAttStandard, PhaOffset = ExpectPhaStandard - Phase };
+                    case PhaseStepShiftDirection.Anticlockwise:
+                        return new Channel(APortID, BPortID) { AttOffset = Attenuation - ExpectAttStandard, PhaOffset = Phase - ExpectPhaStandard };
+                    case PhaseStepShiftDirection.Default:
+                        throw new Exception("Matrix PhaseStepShiftDirection Error.");
+                    default:
+                        throw new Exception("Matrix PhaseStepShiftDirection Error.");
                 }
             }
         }

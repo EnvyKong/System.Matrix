@@ -6,11 +6,8 @@
         {
             GetDeviceData();
         }
-
         public abstract void GetDeviceData();
-
         public virtual string TypeName { get { return GetType().Name; } }
-
         public string IP { get; protected set; } = "192.168.0.0";
         public int PortNum { get; protected set; }
         public int APortConnectNum { get; protected set; }

@@ -6,7 +6,7 @@ namespace System.Matrix
 {
     public abstract class Device : TcpClient
     {
-        public DeviceData DeviceData { get; }
+        protected readonly DeviceData _deviceData;
 
         public const string CALIBRATE_OFFSET_DATA_PATH = "calibrate.txt";
 
@@ -14,15 +14,15 @@ namespace System.Matrix
 
         public string BaseName { get => GetType().BaseType.Name; }
 
-        public int APortNum { get => DeviceData.APortNum; }
+        public int APortNum { get => _deviceData.APortNum; }
 
-        public int BPortNum { get => DeviceData.BPortNum; }
+        public int BPortNum { get => _deviceData.BPortNum; }
 
-        public int APortConnectNum { get => DeviceData.APortConnectNum; }
+        public int APortConnectNum { get => _deviceData.APortConnectNum; }
 
-        public int BPortConnectNum { get => DeviceData.BPortConnectNum; }
+        public int BPortConnectNum { get => _deviceData.BPortConnectNum; }
 
-        public long Frequency { get => DeviceData.Frequency; }
+        public long Frequency { get => _deviceData.Frequency; }
 
         public int this[int aPortID, int bPortID]
         {
@@ -48,14 +48,14 @@ namespace System.Matrix
 
         protected Device(DeviceData deviceData)
         {
-            DeviceData = deviceData;
+            _deviceData = deviceData;
         }
 
         public virtual string IP
         {
             get
             {
-                return DeviceData.IP;
+                return _deviceData.IP;
             }
         }
 
@@ -68,7 +68,7 @@ namespace System.Matrix
             private set { }
         }
 
-        public int PortNum { get => DeviceData.PortNum; }
+        public int PortNum { get => _deviceData.PortNum; }
 
         public virtual void Connect()
         {

@@ -12,14 +12,11 @@ namespace System.Matrix
 
         }
 
-        private Vertex _vertex1;
-        private Vertex _vertex2;
-
         public override void Calibrate()
         {
             try
             {
-                var _signalPaths = new List<SignalPath>();
+                var signalPaths = new List<SignalPath>();
                 TaskFactory taskFactory = new TaskFactory();
                 Task[] tasks = new Task[]
                 {
@@ -67,16 +64,16 @@ namespace System.Matrix
                     if (i <= attCalFre)
                     {
                         //开始获取通道衰减
-                        _signalPaths = GetAllSignalPathData();
+                        signalPaths = GetAllSignalPathData();
                         if (Log.log.IsInfoEnabled)
                         {
-                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", _signalPaths.Count, Vertexs.Count);
+                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", signalPaths.Count, Vertex.Count);
                         }
 
                         //找到衰减最小值
-                        SignalPath.ExpectAttStandard = _signalPaths.Select(s => s.Attenuation).Min();
+                        SignalPath.ExpectAttStandard = signalPaths.Select(s => s.Attenuation).Min();
 
-                        Task taskSetMatrixAtt = new Task(() => { Matrix.SetAtt(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true); });
+                        Task taskSetMatrixAtt = new Task(() => { Matrix.SetAtt(signalPaths.Select(s => s.ChannelToMatrix).ToList(), true); });
                         taskSetMatrixAtt.Start();
                         taskSetMatrixAtt.Wait();
 
@@ -111,7 +108,7 @@ namespace System.Matrix
                             var inPortID = (b - 1) % Vertexs[0].APortConnectNum + 1;
                             var outPortID = 1;
 
-                            (Vertexs[vertexID] as Vertex).OpenChannel(inPortID, outPortID, UpDown.DOWN);
+                            Vertexs[vertexID].OpenChannel(inPortID, outPortID, UpDown.DOWN);
 
                             if (Log.log.IsInfoEnabled)
                             {
@@ -129,9 +126,9 @@ namespace System.Matrix
                                 {
                                     Log.log.InfoFormat("相位校准阶段切开关 {0}{1} OK。", calBoxAPortID, calBoxBPortID);
                                 }
-                                _signalPaths.Find(s => s.Index.Equals($"{a}:{b}:1")).Phase = VNA.GetMarkerY(VNA.PhaMarkPoint);
+                                signalPaths.Find(s => s.Index.Equals($"{a}:{b}:1")).Phase = VNA.GetMarkerY(VNA.PhaMarkPoint);
                             }
-                            (Vertexs[vertexID] as Vertex).CloseChannel(inPortID, outPortID, UpDown.DOWN);
+                            Vertexs[vertexID].CloseChannel(inPortID, outPortID, UpDown.DOWN);
 
                             if (Log.log.IsInfoEnabled)
                             {
@@ -139,7 +136,7 @@ namespace System.Matrix
                             }
                         }
 
-                        Task taskSetMatrixPha = new Task(() => { Matrix.SetPha(_signalPaths.Select(s => s.ChannelToMatrix).ToList(), true); });
+                        Task taskSetMatrixPha = new Task(() => { Matrix.SetPha(signalPaths.Select(s => s.ChannelToMatrix).ToList(), true); });
                         taskSetMatrixPha.Start();
                         taskSetMatrixPha.Wait();
 
@@ -177,7 +174,8 @@ namespace System.Matrix
             }
         }
 
-        private void TasksEnded(Task[] tasks)
+
+        void TasksEnded(Task[] tasks)
         {
             if (tasks[0].IsCompleted)
             {
@@ -197,9 +195,9 @@ namespace System.Matrix
             VNA.SetMarkerActive();
             VNA.SetMarkerX((Matrix as Matrix).Frequency * 1000000);
             //关闭Vertex所有通道，后面用哪个打开哪个
-            foreach (var v in Vertexs)
+            foreach (var vertex in Vertexs)
             {
-                (v as Vertex).CloseAllChannel(v.APortNum, v.BPortNum);
+                vertex.CloseAllChannel(vertex.APortNum, vertex.BPortNum);
             }
             for (int b = 1; b <= Matrix.BPortConnectNum; b++)
             {
@@ -208,7 +206,7 @@ namespace System.Matrix
                 var inPortID = (b - 1) % Vertexs[0].APortConnectNum + 1;
                 var outPortID = 1;
 
-                (Vertexs[vertexID] as Vertex).OpenChannel(inPortID, outPortID, UpDown.DOWN);
+                Vertexs[vertexID].OpenChannel(inPortID, outPortID, UpDown.DOWN);
 
                 if (Log.log.IsInfoEnabled)
                 {
@@ -229,7 +227,7 @@ namespace System.Matrix
                     }
                     //(CalBoxToMatrix as CalBoxToMatrix).SetSwitch(a);
                     //calBoxToVertex .SetSwitch(c);
-                    var signalPath = new SignalPath(SwitchAdapter.CalBoxData, Matrix.DeviceData)
+                    var signalPath = new SignalPath(SwitchAdapter.CalBoxData, Matrix.PhaseStepShiftDirection)
                     {
                         APortID = a,
                         BPortID = b,
@@ -238,7 +236,7 @@ namespace System.Matrix
                     };
                     signalPaths.Add(signalPath);
                 }
-                (Vertexs[vertexID] as Vertex).CloseChannel(inPortID, outPortID, UpDown.DOWN);
+                Vertexs[vertexID].CloseChannel(inPortID, outPortID, UpDown.DOWN);
 
                 if (Log.log.IsInfoEnabled)
                 {
@@ -251,19 +249,6 @@ namespace System.Matrix
         public override void CalibrateByFile(string path)
         {
             throw new NotImplementedException();
-        }
-
-        public override void Initialize()
-        {
-            Matrix = new Matrix(DeviceData.Find(d => d.TypeName.ToLower().Contains("matrix")));
-            _vertex1 = new Vertex(DeviceData.Find(d => d.TypeName.ToLower().Contains("vertex1")));
-            _vertex2 = new Vertex(DeviceData.Find(d => d.TypeName.ToLower().Contains("vertex2")));
-            Vertexs = new List<Vertex> { _vertex1, _vertex2 };
-            CalBoxToMatrix = new CalBoxToMatrix(DeviceData.Find(d => d.TypeName.ToLower().Contains("calboxtomatrix")));
-            CalBoxToVertex = new CalBoxToVertex(DeviceData.Find(d => d.TypeName.ToLower().Contains("calboxtovertex")));
-            CalBoxWhole = new CalBoxWhole(DeviceData.Find(d => d.TypeName.ToLower().Contains("calboxwhole")));
-            VNA = VNAFactory.GetVNA(DeviceData.Find(d => d.TypeName.ToLower().Contains("vna")));
-            SwitchAdapter = new SwitchAdapter<ISwitch>(CalBoxToMatrix, CalBoxToVertex, CalBoxWhole);
         }
 
         public override void ConnectAll()
