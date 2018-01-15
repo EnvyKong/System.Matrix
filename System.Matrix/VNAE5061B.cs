@@ -12,7 +12,7 @@ namespace System.Matrix
         ////定义读取的长度
         //private int intReadLength;
 
-        public VNAE5061B(DeviceData data) : base(data)
+        public VNAE5061B(DeviceData deviceData) : base(deviceData)
         {
 
         }

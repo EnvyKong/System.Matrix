@@ -5,7 +5,7 @@ namespace System.Matrix
 {
     class VNARSZVB8 : VNA, IVectorNetworkAnalyzer
     {
-        public VNARSZVB8(DeviceData data) : base(data)
+        public VNARSZVB8(DeviceData deviceData) : base(deviceData)
         {
 
         }

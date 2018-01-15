@@ -186,14 +186,14 @@ namespace System.Matrix
 
     public class SignalPath
     {
-        public SignalPath(CalBoxData calBoxData, DeviceData data)
+        public SignalPath(CalBoxData calBoxData, DeviceData deviceData)
         {
             _calBoxData = calBoxData;
-            _data = data;
+            _deviceData = deviceData;
         }
 
         private CalBoxData _calBoxData;
-        private DeviceData _data;
+        private DeviceData _deviceData;
 
         public static bool HasAttStandardValue { get; private set; }
         public static bool HasPhaStandardValue { get; private set; }
@@ -261,7 +261,7 @@ namespace System.Matrix
         {
             get
             {
-                if (_data.PhaseStepShiftDirection == PhaseStepShiftDirection.Anticlockwise)
+                if (_deviceData.PhaseStepShiftDirection == PhaseStepShiftDirection.Anticlockwise)
                 {
                     return new Channel(APortID, BPortID) { AttOffset = Attenuation - ExpectAttStandard, PhaOffset = Phase - ExpectPhaStandard };
                 }

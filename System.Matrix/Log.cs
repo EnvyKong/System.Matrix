@@ -4,6 +4,6 @@ namespace System.Matrix
 {
     public static class Log
     {
-        public static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        public static readonly log4net.ILog log = log4net.LogManager.GetLogger(Reflection.MethodBase.GetCurrentMethod().DeclaringType);
     }
 }

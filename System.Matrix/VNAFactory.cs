@@ -4,9 +4,9 @@ namespace System.Matrix
 {
     public static class VNAFactory
     {
-        public static IVectorNetworkAnalyzer GetVNA(DeviceData data)
+        public static IVectorNetworkAnalyzer GetVNA(DeviceData deviceData)
         {
-            string typeStr = data.VNAType.ToString();
+            string typeStr = deviceData.VNAType.ToString();
             if (typeStr.Contains("E5072A") | typeStr.Contains("E5071C") | typeStr.Contains("E5070B"))
             {
                 typeStr = "VNAE5061B";
@@ -24,7 +24,7 @@ namespace System.Matrix
                 throw new NotImplementedException("VNA type error.");
             }
             var vnaType = Type.GetType($"{MethodBase.GetCurrentMethod().DeclaringType.Namespace}.{typeStr}");
-            return Activator.CreateInstance(vnaType, data) as IVectorNetworkAnalyzer;
+            return Activator.CreateInstance(vnaType, deviceData) as IVectorNetworkAnalyzer;
         }
     }
 }

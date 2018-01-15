@@ -6,7 +6,7 @@ namespace System.Matrix
     {
         protected FormattedIO488 messageBased;
 
-        public VNA(DeviceData data) : base(data)
+        public VNA(DeviceData deviceData) : base(deviceData)
         {
 
         }

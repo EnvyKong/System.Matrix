@@ -6,7 +6,7 @@ namespace System.Matrix
 {
     public class Matrix : Device
     {
-        public Matrix(DeviceData data) : base(data)
+        public Matrix(DeviceData deviceData) : base(deviceData)
         {
             try
             {
@@ -318,7 +318,7 @@ namespace System.Matrix
             }
         }
 
-        public Vertex(DeviceData data) : base(data)
+        public Vertex(DeviceData deviceData) : base(deviceData)
         {
 
         }
@@ -417,7 +417,7 @@ namespace System.Matrix
 
     public abstract class CalBox : Device, ISwitch
     {
-        public CalBox(DeviceData data) : base(data)
+        public CalBox(DeviceData deviceData) : base(deviceData)
         {
             CalBoxData = new CalBoxData();
         }
@@ -503,7 +503,7 @@ namespace System.Matrix
 
     public class CalBoxWhole : CalBox
     {
-        public CalBoxWhole(DeviceData data) : base(data)
+        public CalBoxWhole(DeviceData deviceData) : base(deviceData)
         {
         }
 
@@ -757,7 +757,7 @@ namespace System.Matrix
 
     public class CalBoxToMatrix : CalBox
     {
-        public CalBoxToMatrix(DeviceData data) : base(data)
+        public CalBoxToMatrix(DeviceData deviceData) : base(deviceData)
         {
         }
 
@@ -796,7 +796,7 @@ namespace System.Matrix
 
     public class CalBoxToVertex : CalBox
     {
-        public CalBoxToVertex(DeviceData data) : base(data)
+        public CalBoxToVertex(DeviceData deviceData) : base(deviceData)
         {
         }
 
