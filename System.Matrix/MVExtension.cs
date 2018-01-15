@@ -8,7 +8,7 @@ namespace System.Matrix
         {
             while (true)
             {
-                if (response.EndsWith("Vertex>"))
+                if (response.Contains("Vertex>"))
                 {
                     break;
                 }

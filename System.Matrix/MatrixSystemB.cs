@@ -9,7 +9,7 @@ namespace System.Matrix
 {
     public class MatrixSystemB : MatrixSystem
     {
-        public MatrixSystemB(List<DeviceData> deviceDatas) : base(deviceDatas)
+        public MatrixSystemB(params DeviceData[] deviceDatas) : base(deviceDatas)
         {
 
         }

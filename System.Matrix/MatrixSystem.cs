@@ -1,14 +1,16 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 
 namespace System.Matrix
 {
     public abstract class MatrixSystem
     {
-        public MatrixSystem(List<DeviceData> deviceDatas)
+        public MatrixSystem(params DeviceData[] deviceDatas)
         {
-            DeviceData = deviceDatas;
+            DeviceData = deviceDatas.ToList();
             Initialize();
         }
+
 
         protected List<DeviceData> DeviceData { get; }
 

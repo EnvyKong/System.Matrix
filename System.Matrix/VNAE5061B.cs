@@ -179,9 +179,8 @@ namespace System.Matrix
             string strCmd = "";
             int netChannel = 1;
 
-            int intTrace = 0;
             trace = trace.Replace("Trc", "");
-            int.TryParse(trace, out intTrace);
+            int.TryParse(trace, out int intTrace);
 
             string[] revValue = null;
             int index = 0;
@@ -336,9 +335,8 @@ namespace System.Matrix
                 string strCmd = "";
                 int netChannel = 1;
 
-                int intTrace = 0;
                 trace = trace.Replace("Trc", "");
-                int.TryParse(trace, out intTrace);
+                int.TryParse(trace, out int intTrace);
 
                 string value = null;
                 try
@@ -691,8 +689,7 @@ namespace System.Matrix
                 //MessageBox.Show("VNA disconnected.Please open again.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 strRe = "";
             }
-            double Freq = 0;
-            if (double.TryParse(strRe, out Freq))
+            if (double.TryParse(strRe, out double Freq))
             {
                 Freq = Freq / 1000000;
                 return Freq;
@@ -718,8 +715,7 @@ namespace System.Matrix
                 //MessageBox.Show("VNA disconnected.Please open again.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 strRe = "";
             }
-            double Freq = 0;
-            if (double.TryParse(strRe, out Freq))
+            if (double.TryParse(strRe, out double Freq))
             {
                 Freq = Freq / 1000000;
                 return Freq;

@@ -41,14 +41,11 @@
             {
                 _calBoxToMatrix.GetCalBoxData();
                 _calBoxToVertex.GetCalBoxData();
-
-                //return CalBoxData;
             }
             else if (_calBoxWhole.Connected)
             {
-                //CalBoxData = _calBoxWhole.GetCalBoxData();
-
-                //return CalBoxData;
+                _calBoxWhole.GetCalBoxData();
+                CalBoxData = _calBoxWhole.CalBoxData;
             }
             else
             {

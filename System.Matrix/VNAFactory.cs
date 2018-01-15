@@ -11,7 +11,7 @@ namespace System.Matrix
             {
                 typeStr = "VNAE5061B";
             }
-            else if (typeStr.Contains("RSZVB8"))
+            else if (typeStr.Contains("ZNB8"))
             {
                 typeStr = "VNARSZVB8";
             }
