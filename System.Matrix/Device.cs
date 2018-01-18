@@ -6,6 +6,8 @@ namespace System.Matrix
 {
     public abstract class Device : TcpClient
     {
+        public static int Quantity { get; set; }
+
         protected readonly DeviceData _deviceData;
 
         public const string CALIBRATE_OFFSET_DATA_PATH = "calibrate.txt";
@@ -44,11 +46,12 @@ namespace System.Matrix
             }
         }
 
-        public virtual string Cmd { get; set; }
+        protected string _cmd { get; set; }
 
         protected Device(DeviceData deviceData)
         {
             _deviceData = deviceData;
+            Quantity++;
         }
 
         public virtual string IP

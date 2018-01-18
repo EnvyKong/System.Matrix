@@ -67,7 +67,7 @@ namespace System.Matrix
                         signalPaths = GetAllSignalPathData();
                         if (Log.log.IsInfoEnabled)
                         {
-                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", signalPaths.Count, Vertex.Count);
+                            Log.log.InfoFormat("通道总数量为{0}。Vertex台数为{1}。", signalPaths.Count, Vertex.Quantity);
                         }
 
                         //找到衰减最小值

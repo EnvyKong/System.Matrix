@@ -33,11 +33,6 @@ namespace System.Matrix
 
         public List<Channel> ChannelList { get; }
 
-        //public double AttenuationStep { get => (double)EntryData.GetPropertyValue("AttenuationStep"); }
-        //public double PhaseStep { get => (double)EntryData.GetPropertyValue("PhaseStep"); }
-        //public int AttCalFre { get => (int)EntryData.GetPropertyValue("AttCalFre"); }
-        //public int PhaCalFre { get => (int)EntryData.GetPropertyValue("PhaCalFre"); }
-
         public double AttenuationStep { get => _deviceData.AttenuationStep; }
         public double PhaseStep { get => _deviceData.PhaseStep; }
         public int AttCalFre { get => _deviceData.AttCalFre; }
@@ -46,38 +41,38 @@ namespace System.Matrix
 
         private string SetAttCmd(int id, int value)
         {
-            Cmd = $"ATT:SHIFt:{id},{value}";
-            return Send(Cmd);
+            _cmd = $"ATT:SHIFt:{id},{value}";
+            return Send(_cmd);
         }
 
         private string SetPhaCmd(int id, int value)
         {
-            Cmd = $"PHASe:SHIFt:{id},{value}";
-            return Send(Cmd);
+            _cmd = $"PHASe:SHIFt:{id},{value}";
+            return Send(_cmd);
         }
 
         private string SetPhaAndAttCmd(int id, int pha, int att)
         {
-            Cmd = $"SETM:{id},{pha},{att}";
-            return Send(Cmd);
+            _cmd = $"SETM:{id},{pha},{att}";
+            return Send(_cmd);
         }
 
         private string ReadIDNCmd()
         {
-            Cmd = "*IDN?";
-            return Send(Cmd);
+            _cmd = "*IDN?";
+            return Send(_cmd);
         }
 
         internal int CurrentPha(int id)
         {
-            Cmd = $"READM:{id}";
-            return Send(Cmd).Replace("\r\n", "").Split(',')[1].ToInt32();
+            _cmd = $"READM:{id}";
+            return Send(_cmd).Replace("\r\n", "").Split(',')[1].ToInt32();
         }
 
         internal int CurrentAtt(int id)
         {
-            Cmd = $"READM:{id}";
-            return Send(Cmd).Replace("\r\n", "").Split(',')[2].ToInt32();
+            _cmd = $"READM:{id}";
+            return Send(_cmd).Replace("\r\n", "").Split(',')[2].ToInt32();
         }
 
         internal string ReadIDN()
@@ -91,7 +86,7 @@ namespace System.Matrix
             {
                 channelList = new List<Channel>();
 
-                if (filePath.ToLower().EndsWith(".txt"))
+                if (Path.GetExtension(filePath).Equals(".txt"))
                 {
                     var rows = File.ReadAllLines(filePath);
                     for (int r = 0; r < rows.Length; r++)
@@ -103,7 +98,7 @@ namespace System.Matrix
                         }
                     }
                 }
-                else if (filePath.ToLower().EndsWith(".csv"))
+                else if (Path.GetExtension(filePath).Equals(".csv"))
                 {
                     var rows = File.ReadAllLines(filePath);
                     for (int r = 0; r < rows.Length; r++)
@@ -148,7 +143,7 @@ namespace System.Matrix
                         var currentPha = CurrentPha(this[channel.APortID, channel.BPortID]);
                         var offset = (int)Math.Round(channel.PhaOffset / _deviceData.PhaseStep);
                         var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (currentPha + offset) % (int)(360 / _deviceData.PhaseStep));
-                        if ((!x.Contains("OK")))
+                        if ((!x.ToUpper().Contains("OK")))
                         {
                             Log.log.ErrorFormat("Signal Path ID : A{0}B{1} Set Value Error!", channel.APortID, channel.BPortID);
                         }
@@ -160,7 +155,7 @@ namespace System.Matrix
                     {
                         var offset = (int)Math.Round(channel.PhaOffset / _deviceData.PhaseStep);
                         var x = SetPhaCmd(this[channel.APortID, channel.BPortID], (channel.PhaStdCode + offset) % (int)(360 / _deviceData.PhaseStep));
-                        if ((!x.Contains("OK")))
+                        if ((!x.ToUpper().Contains("OK")))
                         {
                             Log.log.ErrorFormat("Signal Path ID : A{0}B{1} Set Value Error!", channel.APortID, channel.BPortID);
                         }
@@ -243,8 +238,8 @@ namespace System.Matrix
 
         private string AddFrameInfoCmd(string frameInfo)
         {
-            Cmd = $"SCENe:ADD:{frameInfo}";
-            return Send(Cmd);
+            _cmd = $"SCENe:ADD:{frameInfo}";
+            return Send(_cmd);
         }
 
         internal void CheckDB(string checkInfo)
@@ -258,8 +253,8 @@ namespace System.Matrix
 
         private string CheckDBCmd(string checkInfo)
         {
-            Cmd = $"SCENe:VERIfy:{checkInfo}";
-            return Send(Cmd);
+            _cmd = $"SCENe:VERIfy:{checkInfo}";
+            return Send(_cmd);
         }
 
         internal void DownLoadDBToFirmware(string downLoadInfo)
@@ -273,8 +268,8 @@ namespace System.Matrix
 
         private string DownLoadDBToFirmwareCmd(string downLoadInfo)
         {
-            Cmd = $"SCENe:DOWNload:{downLoadInfo}";
-            return Send(Cmd);
+            _cmd = $"SCENe:DOWNload:{downLoadInfo}";
+            return Send(_cmd);
         }
 
         internal void PlayScene(string playInfo)
@@ -288,15 +283,13 @@ namespace System.Matrix
 
         private string PlaySceneCmd(string playInfo)
         {
-            Cmd = $"SCENe:PLAY:{playInfo}";
-            return Send(Cmd);
+            _cmd = $"SCENe:PLAY:{playInfo}";
+            return Send(_cmd);
         }
     }
 
     public class Vertex : Device
     {
-        public static int Count { get; set; }
-
         internal void OpenChannel(int inPortID, int outPortID, UpDown linkUpDown)
         {
             try
@@ -304,16 +297,16 @@ namespace System.Matrix
                 switch (linkUpDown)
                 {
                     case UpDown.UP:
-                        Cmd = $"SYST:RLINK:BA{inPortID}{outPortID}:STATe ON";
+                        _cmd = $"SYST:RLINK:BA{inPortID}{outPortID}:STATe ON";
                         break;
                     case UpDown.DOWN:
-                        Cmd = $"SYST:RLINK:AB{inPortID}{outPortID}:STATe ON";
+                        _cmd = $"SYST:RLINK:AB{inPortID}{outPortID}:STATe ON";
                         break;
                     default:
-                        Cmd = "";
+                        _cmd = "";
                         break;
                 }
-                Send(Cmd).WaitCompleted(Send, Cmd);
+                Send(_cmd).WaitCompleted(Send, _cmd);
             }
             catch (Exception ex)
             {
@@ -323,7 +316,7 @@ namespace System.Matrix
 
         public Vertex(DeviceData deviceData) : base(deviceData)
         {
-            Count++;
+
         }
 
         internal void CloseChannel(int inPortID, int outPortID, UpDown linkUpDown)
@@ -333,16 +326,16 @@ namespace System.Matrix
                 switch (linkUpDown)
                 {
                     case UpDown.UP:
-                        Cmd = $"SYST:RLINK:BA{inPortID}{outPortID}:STATe OFF";
+                        _cmd = $"SYST:RLINK:BA{inPortID}{outPortID}:STATe OFF";
                         break;
                     case UpDown.DOWN:
-                        Cmd = $"SYST:RLINK:AB{inPortID}{outPortID}:STATe OFF";
+                        _cmd = $"SYST:RLINK:AB{inPortID}{outPortID}:STATe OFF";
                         break;
                     default:
-                        Cmd = "";
+                        _cmd = "";
                         break;
                 }
-                Send(Cmd).WaitCompleted(Send, Cmd);
+                Send(_cmd).WaitCompleted(Send, _cmd);
             }
             catch (Exception ex)
             {
@@ -358,10 +351,10 @@ namespace System.Matrix
                 {
                     for (int b = 1; b <= bPortNum; b++)
                     {
-                        Cmd = $"SYST:RLINK:BA{b}{a}:STATe OFF";
-                        Send(Cmd).WaitCompleted(Send, Cmd);
-                        Cmd = $"SYST:RLINK:AB{a}{b}:STATe OFF";
-                        Send(Cmd).WaitCompleted(Send, Cmd);
+                        _cmd = $"SYST:RLINK:BA{b}{a}:STATe OFF";
+                        Send(_cmd).WaitCompleted(Send, _cmd);
+                        _cmd = $"SYST:RLINK:AB{a}{b}:STATe OFF";
+                        Send(_cmd).WaitCompleted(Send, _cmd);
                     }
                 }
             }
@@ -375,8 +368,8 @@ namespace System.Matrix
         {
             try
             {
-                Cmd = "*RST";
-                Send(Cmd).WaitCompleted(Send, Cmd);
+                _cmd = "*RST";
+                Send(_cmd).WaitCompleted(Send, _cmd);
             }
             catch (Exception ex)
             {
@@ -394,10 +387,10 @@ namespace System.Matrix
             try
             {
                 var port = index.Split(':');
-                Cmd = $"RLINK:BA{port[1]}{port[0]}:PHAse {upLinkValue}";
-                Send(Cmd).WaitCompleted(Send, Cmd);
-                Cmd = $"RLINK:AB{port[0]}{port[1]}:PHAse {downLinkValue}";
-                Send(Cmd).WaitCompleted(Send, Cmd);
+                _cmd = $"RLINK:BA{port[1]}{port[0]}:PHAse {upLinkValue}";
+                Send(_cmd).WaitCompleted(Send, _cmd);
+                _cmd = $"RLINK:AB{port[0]}{port[1]}:PHAse {downLinkValue}";
+                Send(_cmd).WaitCompleted(Send, _cmd);
             }
             catch (Exception ex)
             {
@@ -407,14 +400,14 @@ namespace System.Matrix
 
         internal void SelfCalibrate()
         {
-            Cmd = "CONnection:IPCAL:BEGin";
-            Send(Cmd);
+            _cmd = "CONnection:IPCAL:BEGin";
+            Send(_cmd);
         }
 
         internal bool IsSelfCalibrateComplete()
         {
-            Cmd = "CONnection:IPCAL:STATus?";
-            return Send(Cmd).Contains("Completed");
+            _cmd = "CONnection:IPCAL:STATus?";
+            return Send(_cmd).Contains("Completed");
         }
     }
 
@@ -448,20 +441,20 @@ namespace System.Matrix
 
         private string CutSwitch(int switchID, int pin)
         {
-            Cmd = "SETSW:" + switchID.ToString() + ":" + pin.ToString();
+            _cmd = "SETSW:" + switchID.ToString() + ":" + pin.ToString();
             return "";
         }
 
         internal string RouteChangeTo(int v1, int v2)
         {
-            Cmd = $"SET:{v1}:{v2}";
-            return Send(Cmd);
+            _cmd = $"SET:{v1}:{v2}";
+            return Send(_cmd);
         }
 
         internal string GetCalBoxDataCmd(int frequency)
         {
-            Cmd = $"READcb:{frequency}";
-            return Send(Cmd);
+            _cmd = $"READcb:{frequency}";
+            return Send(_cmd);
         }
 
         public virtual void DoSwitch(int aPort, int bPort)

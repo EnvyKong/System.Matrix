@@ -24,7 +24,6 @@ namespace System.Matrix
 
         public static void Join()
         {
-
         }
     }
 }

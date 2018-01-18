@@ -12,10 +12,6 @@ namespace System.Matrix
 
         public override bool Connected { get; set; }
 
-        //public int PhaMarkPoint => (int)EntryData.GetPropertyValue("PhaMarkPoint");
-
-        //public int AttMarkPoint => (int)EntryData.GetPropertyValue("AttMarkPoint");
-
         public int PhaMarkPoint => _deviceData.PhaMarkPoint;
 
         public int AttMarkPoint => _deviceData.AttMarkPoint;
@@ -69,19 +65,10 @@ namespace System.Matrix
             double dY;
             try
             {
-                //Write("INIT1:CONT ON");
-                ////Set the trigger source to Bus Trigger.
-                //Write(":TRIG:SOUR BUS");
-                ////Trigger the instrument to start a sweep cycle.
-                //Write(":TRIG:SING");
-                ////Execute the *OPC? command and wait until the command
-                //QueryString("*OPC?");
-                //strCmd = "CALC1:MARK1:Y?";2016-9-27,修改为设置Trace
                 SelTrace("Trc" + trace);
                 SetSingleSweepMode();
-                strCmd = string.Format("CALC:MARK:Y?", trace);//读取trace1的marker数值  //测试命令CALC{0}:MARK:Y?
+                strCmd = string.Format("CALC:MARK:Y?", trace);
                 sY = QueryString(strCmd);
-                //Common.OutputForm.WriteMessage(sY);
                 dY = Convert.ToDouble(sY.Split(',')[0]);
                 return dY;
             }
@@ -94,8 +81,6 @@ namespace System.Matrix
 
         private void SelTrace(string trace)
         {
-            //CALC2:PAR:SDEF 'Trc2', 'S12'
-            //string strCmd = ":CALC1:PAR1" + ":DEF " + trace;
             string strCmd = "CALC1:PAR:SEL '" + trace + "'";
             messageBased.WriteString(strCmd);
         }

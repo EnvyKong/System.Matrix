@@ -12,7 +12,6 @@ namespace System.Matrix
         }
 
         protected readonly List<DeviceData> _deviceDatas;
-        //protected List<SignalPath> _signalPaths;
 
         protected IVectorNetworkAnalyzer VNA { get; set; }
         protected Matrix Matrix { get; set; }

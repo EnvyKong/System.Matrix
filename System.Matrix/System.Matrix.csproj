@@ -94,7 +94,6 @@
     <Compile Include="ISwitch.cs" />
     <Compile Include="MatrixSystem.cs" />
     <Compile Include="MatrixSystemB.cs" />
-    <Compile Include="IScene.cs" />
     <Compile Include="IVectorNetworkAnalyzer.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="MatrixSystemT.cs" />
@@ -102,7 +101,6 @@
     <Compile Include="MVExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SwitchAdapter.cs" />
-    <Compile Include="ThreadHelper.cs" />
     <Compile Include="VNA.cs" />
     <Compile Include="VNAE5061B.cs" />
     <Compile Include="VNAFactory.cs" />

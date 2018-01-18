@@ -104,11 +104,14 @@ namespace System.Matrix
 
     public class Channel
     {
+        public static int Count { get; set; }
+
         public Channel(int aPortNum, int bPortNum)
         {
             Index = $"{aPortNum}:{bPortNum}";
             APortID = aPortNum;
             BPortID = bPortNum;
+            Count++;
         }
 
         public string Index { get; }
@@ -179,9 +182,9 @@ namespace System.Matrix
 
     public enum PhaseStepShiftDirection
     {
+        Default,
         Clockwise,
-        Anticlockwise,
-        Default
+        Anticlockwise
     }
 
     public class SignalPath
