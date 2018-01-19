@@ -93,7 +93,7 @@ namespace System.Matrix
             _channelsToMatrix = channelToMatrixList;
         }
 
-        private List<Channel> _channelsToMatrix;
+        private readonly List<Channel> _channelsToMatrix;
         public ReadOnlyCollection<Channel> ChannelToMatrixCollection
         {
             get { return _channelsToMatrix.AsReadOnly(); }

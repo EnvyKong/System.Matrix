@@ -1,19 +1,36 @@
 ﻿namespace System.Matrix
 {
-    public class SwitchAdapter<TSwitch> : ISwitch where TSwitch : ISwitch
+    public class SwitchAdapter<T> : ISwitch where T : ISwitch
     {
-        private TSwitch _calBoxToMatrix;
-        private TSwitch _calBoxToVertex;
-        private TSwitch _calBoxWhole;
+        private readonly T _calBoxToMatrix;
+        private readonly T _calBoxToVertex;
+        private readonly T _calBoxWhole;
 
-        public SwitchAdapter(TSwitch calBoxToMatrix, TSwitch calBoxToVertex, TSwitch calBoxWhole)
+        public SwitchAdapter(T calBoxToMatrix, T calBoxToVertex, T calBoxWhole)
         {
             _calBoxToMatrix = calBoxToMatrix;
             _calBoxToVertex = calBoxToVertex;
             _calBoxWhole = calBoxWhole;
         }
 
-        public bool Connected => throw new NotImplementedException();
+        public bool Connected
+        {
+            get
+            {
+                if (_calBoxToMatrix.Connected & _calBoxToVertex.Connected)
+                {
+                    return true;
+                }
+                else if (_calBoxWhole.Connected)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+        }
 
         public CalBoxData CalBoxData { get; set; }
 
