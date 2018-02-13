@@ -6,7 +6,7 @@ namespace System.Matrix
 {
     public abstract class Device : TcpClient
     {
-        public static int Quantity { get; set; }
+        public static int Quantity { get; private set; }
 
         protected readonly DeviceData _deviceData;
 
@@ -46,7 +46,7 @@ namespace System.Matrix
             }
         }
 
-        protected string _cmd { get; set; }
+        protected string _cmd;
 
         protected Device(DeviceData deviceData)
         {
